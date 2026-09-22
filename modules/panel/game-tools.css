@@ -1,0 +1,47 @@
+.group-create-dialog {
+  width: min(680px, calc(100vw - 2rem));
+  max-width: 680px;
+  max-height: min(86vh, 760px);
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid color-mix(in srgb, var(--section-color) 34%, #ffffff1a);
+  background: linear-gradient(145deg, #20232c, #171a22);
+  box-shadow: 0 24px 70px #020812bb, 0 0 30px color-mix(in srgb, var(--section-color) 10%, transparent);
+}
+.group-create-dialog form { gap: 18px; }
+.group-create-dialog label { display: grid; gap: 7px; color: #dce7e7; font-size: 12px; font-weight: 600; }
+.group-create-basics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.group-create-settings { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); align-items: end; gap: 12px; }
+.group-create-dialog .group-setting-toggle { display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 36px; padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--section-color) 22%, #ffffff16); border-radius: 6px; background: #ffffff06; cursor: pointer; }
+.group-create-dialog .group-setting-toggle:hover { border-color: color-mix(in srgb, var(--section-color) 55%, #ffffff16); }
+.group-create-dialog .group-setting-toggle [data-slot="checkbox"] { border-color: color-mix(in srgb, var(--section-color) 58%, #ffffff32); }
+.group-create-dialog .group-setting-toggle [data-slot="checkbox"][data-checked] { border-color: var(--section-color); background: var(--section-color); color: #101a20; }
+.group-create-dialog .group-grade-editor { max-height: 310px; padding: 14px; border: 1px solid color-mix(in srgb, var(--section-color) 22%, #ffffff16); border-radius: 8px; background: #0d17257a; }
+.group-create-dialog .group-grade-editor > strong { color: var(--section-color); font-size: 13px; }
+.group-create-dialog .group-grade-editor > strong small { display: block; margin-top: 3px; color: #9faebd; font-size: 11px; font-weight: 400; }
+.group-create-dialog .group-grade-row { display: grid; align-items: end; gap: 10px; min-width: 0; background: #ffffff05; cursor: grab; touch-action: none; transition: opacity .15s ease, border-color .15s ease, background .15s ease; }
+.group-create-dialog .group-grade-row.is-job { grid-template-columns: 28px minmax(0, 1.5fr) minmax(0, .85fr) 90px 36px; }
+.group-create-dialog .group-grade-row.is-gang { grid-template-columns: 28px minmax(0, 1fr) 90px 36px; }
+.group-create-dialog .group-grade-row > label { min-width: 0; }
+.group-create-dialog .group-grade-row input { width: 100%; cursor: text; }
+.group-create-dialog .group-grade-row button, .group-create-dialog .group-grade-row [data-slot="checkbox"] { cursor: pointer; }
+.group-create-dialog .group-grade-row > button { width: 36px; height: 36px; }
+.group-create-dialog .group-grade-row.is-dragging { opacity: .55; border-color: var(--section-color); background: color-mix(in srgb, var(--section-color) 12%, #152131); }
+.group-create-dialog .group-grade-row.is-dragging, .group-create-dialog .group-grade-row.is-dragging > label:not(.group-grade-boss) { cursor: grabbing; user-select: none; }
+.group-create-dialog.group-grade-drag-layer { position: fixed; inset: 0; z-index: 10000; width: 100%; max-width: none; max-height: none; padding: 0; overflow: visible; border: 0; background: transparent; box-shadow: none; pointer-events: none; }
+.group-grade-drag-layer .group-grade-row.group-grade-preview { position: fixed; top: 0; left: 0; margin: 0; opacity: .76; border-color: var(--section-color); background: color-mix(in srgb, var(--section-color) 16%, #152131); box-shadow: 0 18px 36px #030915a8; pointer-events: none; transition: none; cursor: grabbing; }
+.group-grade-level { display: grid; place-items: center; width: 28px; height: 36px; color: var(--section-color); font-size: 13px; font-weight: 700; }
+.group-create-dialog .group-grade-row .group-grade-boss { display: flex; align-items: center; gap: 7px; height: 36px; white-space: nowrap; cursor: pointer; }
+.group-create-dialog .group-grade-boss [data-slot="checkbox"] { border-color: color-mix(in srgb, var(--section-color) 58%, #ffffff32); }
+.group-create-dialog .group-grade-boss [data-slot="checkbox"][data-checked] { border-color: var(--section-color); background: var(--section-color); color: #101a20; }
+.group-create-dialog .group-payment-input { appearance: textfield; -moz-appearance: textfield; }
+.group-create-dialog .group-payment-input::-webkit-inner-spin-button,
+.group-create-dialog .group-payment-input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
+@media (max-width: 560px) {
+  .group-create-basics { grid-template-columns: 1fr; }
+  .group-create-settings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .group-create-settings > label:first-child { grid-column: 1 / -1; }
+  .group-create-dialog .group-grade-row.is-job { grid-template-columns: 28px minmax(0, 1fr) minmax(0, .7fr) 36px; }
+  .group-create-dialog .group-grade-row.is-job .group-grade-boss { grid-column: 2 / 4; grid-row: 2; }
+  .group-create-dialog .group-grade-row.is-job > button { grid-column: 4; grid-row: 1 / 3; }
+}

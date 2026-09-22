@@ -1,0 +1,331 @@
+/* Shared smoked-glass surfaces. Accent light belongs to the active section. */
+.fiveiso-workspace {
+  --entity-card-min-width: 290px;
+  --entity-card-height: 260px;
+  --entity-card-gap: 14px;
+}
+.fiveiso-workspace .layout-collection.layout-grid,
+.fiveiso-workspace .record-grid.team-directory {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--entity-card-min-width)), 1fr));
+  grid-auto-rows: var(--entity-card-height);
+  align-items: stretch;
+  align-content: start;
+  gap: var(--entity-card-gap);
+}
+.fiveiso-workspace .layout-collection.layout-grid > :is(.character-card, .record-card, .item-card, .resource-card),
+.fiveiso-workspace .record-grid.team-directory > .record-card {
+  width: 100%;
+  height: var(--entity-card-height);
+  min-height: var(--entity-card-height);
+  max-height: var(--entity-card-height);
+  min-width: 0;
+  box-sizing: border-box;
+}
+.fiveiso-workspace .record-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  padding: 9px;
+  box-sizing: border-box;
+}
+.fiveiso-workspace .layout-grid .rank-summary-card dl { align-content: start; }
+.fiveiso-workspace,
+.owner-shell {
+  --glass-surface: linear-gradient(135deg, #293342c9, #131923e8);
+  --glass-edge: #b9dbef22;
+  --glass-shadow: inset 0 1px 0 #e4f7ff0b, 0 12px 32px #03060c28;
+  background-image:
+    radial-gradient(ellipse at 24% 0%, #22d3ee24, transparent 43%),
+    radial-gradient(ellipse at 82% 22%, #a273f325, transparent 46%),
+    radial-gradient(ellipse at 55% 100%, #ebaa7311, transparent 45%),
+    linear-gradient(#0a101bed, #0c101aef),
+    url('/assets/panel-background.png') !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+.fiveiso-workspace .page-content { max-width: none; padding: 28px 32px 36px; }
+.fiveiso-workspace .page-heading { margin-bottom: 24px; }
+.fiveiso-workspace .page-heading h1,
+.owner-content .page-heading h1 { color: #f1f6ff; font-size: 25px; letter-spacing: -.65px; }
+.fiveiso-workspace .topbar,
+.owner-shell .owner-header {
+  background: #11192599 !important;
+  border-bottom: 1px solid #c7eaff12 !important;
+  backdrop-filter: blur(24px) saturate(135%);
+}
+.fiveiso-workspace [data-slot='sidebar-inner'],
+.owner-sidebar {
+  background: linear-gradient(170deg, #1a2b37c9, #131724ed 55%, #181724e8) !important;
+  border-right: 1px solid #d5edff14;
+  backdrop-filter: blur(28px) saturate(140%);
+}
+.fiveiso-workspace [data-slot='sidebar-content'] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.fiveiso-workspace [data-slot='sidebar-content']::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+.fiveiso-workspace .brand-icon,
+.owner-brand-icon {
+  color: var(--section-color);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--section-color) 20%, #152333), #17202c);
+  border: 1px solid color-mix(in srgb, var(--section-color) 32%, transparent);
+  box-shadow: inset 0 1px #ffffff18, 0 0 22px color-mix(in srgb, var(--section-color) 10%, transparent);
+}
+.nav-section-label { padding: 18px 12px 7px; font-size: 10px; font-weight: 500; letter-spacing: 1.6px; color: #8293a9; }
+.fiveiso-workspace [data-slot='sidebar-menu-button'] {
+  position: relative; height: 42px; padding: 5px 9px; gap: 10px;
+  border: 1px solid transparent; border-radius: 5px; color: #aebbd0;
+  font-size: 12px; transition: background .2s, border-color .2s, color .2s;
+}
+.nav-icon { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: 4px; background: #b1d4f508; }
+.nav-icon svg { width: 18px; height: 18px; }
+.fiveiso-workspace [data-slot='sidebar-menu-button']:hover { background: #cadfff08; color: #e7f0ff; }
+.fiveiso-workspace [data-slot='sidebar-menu-button'][data-active] {
+  color: var(--section-color);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--section-color) 15%, transparent), color-mix(in srgb, var(--section-color) 4%, transparent));
+  border-color: color-mix(in srgb, var(--section-color) 22%, transparent);
+  box-shadow: inset 2px 0 var(--section-color), 0 0 20px color-mix(in srgb, var(--section-color) 5%, transparent);
+}
+.fiveiso-workspace [data-active] .nav-icon { background: color-mix(in srgb, var(--section-color) 12%, transparent); }
+.fiveiso-workspace [data-active] .nav-icon svg { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--section-color) 45%, transparent)); }
+.fiveiso-workspace :is(.glass-panel, .surface, .character-card, .record-card, .item-card, .resource-card),
+.owner-content .glass-panel {
+  background: var(--glass-surface) !important;
+  border: 1px solid var(--glass-edge) !important;
+  border-radius: 6px;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(20px) saturate(135%);
+}
+.fiveiso-workspace :is(.character-card, .record-card, .item-card, .resource-card) {
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.fiveiso-workspace :is(.clickable-card, .item-card):hover,
+.fiveiso-workspace :is(.clickable-card, .item-card):focus-visible {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--section-color) 10%, #25303deb), #161d29ed) !important;
+  border-color: color-mix(in srgb, var(--section-color) 48%, transparent) !important;
+  box-shadow: inset 0 1px #ffffff13, 0 0 24px color-mix(in srgb, var(--section-color) 9%, transparent);
+}
+.fiveiso-workspace :is(.character-card-heading, .record-card header) { gap: 13px; }
+.fiveiso-workspace :is(.character-card, .record-card) h3 { color: #eef4ff; font-weight: 600; }
+.fiveiso-workspace .character-avatar {
+  border: 1px solid color-mix(in srgb, var(--section-color) 48%, transparent);
+  color: color-mix(in srgb, var(--section-color) 65%, white);
+  background: linear-gradient(140deg, color-mix(in srgb, var(--section-color) 24%, #1b2332), #17202e);
+  box-shadow: inset 0 1px #ffffff22, 0 0 17px color-mix(in srgb, var(--section-color) 13%, transparent);
+}
+.fiveiso-workspace .record-symbol {
+  color: var(--section-color);
+  background: linear-gradient(140deg, color-mix(in srgb, var(--section-color) 22%, #20303c), #182430);
+  border: 1px solid color-mix(in srgb, var(--section-color) 35%, transparent);
+  box-shadow: inset 0 1px #ffffff20, 0 5px 16px #02091030;
+}
+.fiveiso-workspace .record-symbol svg { stroke-width: 1.8; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--section-color) 30%, transparent)); }
+.fiveiso-workspace .directory-summary {
+  background: radial-gradient(ellipse at 20% 0%, color-mix(in srgb, var(--section-color) 18%, transparent), transparent 75%), var(--glass-surface);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow); backdrop-filter: blur(20px);
+}
+.fiveiso-workspace .filter-chips button[aria-pressed='true'] {
+  color: var(--section-color);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--section-color) 25%, #22303e), #1c2433);
+  border-color: color-mix(in srgb, var(--section-color) 55%, transparent);
+  box-shadow: inset 0 1px #ffffff15, 0 0 14px color-mix(in srgb, var(--section-color) 8%, transparent);
+}
+.fiveiso-workspace :is(.record-card header > svg, .resource-card > svg) {
+  color: var(--section-color); stroke-width: 1.8;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--section-color) 24%, transparent));
+}
+.fiveiso-workspace :is(.directory-toolbar, .game-tools-toolbar) { gap: 10px; margin-bottom: 20px; }
+.fiveiso-workspace :is([data-slot='input'], [data-slot='select-trigger'], .search-box),
+.owner-shell :is([data-slot='input'], [data-slot='select-trigger']) {
+  background: linear-gradient(135deg, #283442db, #1b2431ed);
+  border: 1px solid #bbd7ec25;
+  border-radius: 5px;
+  box-shadow: inset 0 1px #ffffff06;
+  color: #e7effc;
+}
+.fiveiso-workspace .search-box [data-slot='input'] { background: transparent; border: 0; box-shadow: none; }
+.fiveiso-workspace :is([data-slot='input'], [data-slot='select-trigger'], .search-box):focus-within {
+  border-color: color-mix(in srgb, var(--section-color) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--section-color) 9%, transparent);
+}
+:is(.fiveiso-workspace, .owner-shell, [data-slot='dialog-content'], [data-slot='alert-dialog-content']) [data-slot='button']:is([data-variant='outline'], [data-variant='secondary']) {
+  background: linear-gradient(145deg, #344151b0, #1e2735d9);
+  border-color: #c1d9f22b;
+  box-shadow: inset 0 1px #ffffff09;
+}
+:is(.fiveiso-workspace, .owner-shell, [data-slot='dialog-content'], [data-slot='alert-dialog-content']) [data-slot='button'][data-variant='default']:not(.action-tile) {
+  color: #eaffff;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--section-color) 38%, #17303b), color-mix(in srgb, var(--section-color) 19%, #1b2636));
+  border: 1px solid color-mix(in srgb, var(--section-color) 58%, transparent);
+  box-shadow: inset 0 1px #ffffff22, 0 0 14px color-mix(in srgb, var(--section-color) 9%, transparent);
+}
+:is(.fiveiso-workspace, .owner-shell, [data-slot='dialog-content'], [data-slot='alert-dialog-content']) [data-slot='button']:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--section-color) 55%, transparent);
+  filter: brightness(1.12);
+}
+.fiveiso-workspace :is(.layout-toggle, .item-catalog-toolbar) [aria-pressed='true'],
+.fiveiso-workspace .server-tab.is-selected {
+  background: linear-gradient(145deg, color-mix(in srgb, var(--section-color) 22%, #243340), #1a2431) !important;
+  border-color: color-mix(in srgb, var(--section-color) 65%, transparent) !important;
+  color: var(--section-color);
+  box-shadow: inset 0 1px #ffffff13, 0 0 15px color-mix(in srgb, var(--section-color) 12%, transparent);
+}
+.fiveiso-workspace .layout-toggle svg { stroke-width: 2; }
+.fiveiso-workspace .command-grid { gap: 18px; }
+.fiveiso-workspace .telemetry-grid { gap: 16px; align-items: stretch; }
+.fiveiso-workspace .occupancy-panel {
+  background: radial-gradient(ellipse at 30% 15%, #24e4c721, transparent 75%), var(--glass-surface) !important;
+}
+.fiveiso-workspace .network-panel {
+  background: radial-gradient(ellipse at 90% 0, #ba83ff27, transparent 75%), var(--glass-surface) !important;
+}
+.fiveiso-workspace .panel-caption { padding: 19px 21px; color: #c8d8e8; font-size: 10px; letter-spacing: 1.1px; }
+.fiveiso-workspace .panel-caption > span:first-child > svg { color: var(--section-color); width: 18px; height: 18px; }
+.fiveiso-workspace .ring-track { stroke: #b1ffec12; }
+.fiveiso-workspace .ring-value { stroke: #51eed8; filter: drop-shadow(0 0 9px #2ce8cf88); }
+.fiveiso-workspace .network-meter .lit { background: #bb97ff; box-shadow: 0 0 12px #bb97ff66; }
+.fiveiso-workspace .dashboard-action {
+  --action-color: #64e7ec;
+  min-height: 94px; padding: 16px; gap: 13px; border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--action-color) 26%, transparent);
+  background: radial-gradient(ellipse at 0 0, color-mix(in srgb, var(--action-color) 16%, transparent), transparent 85%), #182330bd;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(18px);
+  transition: border-color .2s, box-shadow .2s;
+}
+.fiveiso-workspace .dashboard-action.violet { --action-color: #bf96ff; }
+.fiveiso-workspace .dashboard-action.amber { --action-color: #f3be7b; }
+.fiveiso-workspace .action-symbol {
+  width: 46px; height: 46px; flex: 0 0 46px; display: grid; place-items: center;
+  border: 1px solid color-mix(in srgb, var(--action-color) 35%, transparent);
+  border-radius: 7px; color: var(--action-color);
+  background: linear-gradient(140deg, color-mix(in srgb, var(--action-color) 23%, #263347), #1b2634);
+  box-shadow: inset 0 1px #ffffff25, 0 5px 14px #020b202b;
+}
+.fiveiso-workspace .action-symbol svg { width: 24px; height: 24px; stroke-width: 1.8; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--action-color) 40%, transparent)); }
+.fiveiso-workspace .dashboard-action:not(:disabled):hover { border-color: var(--action-color); box-shadow: 0 0 22px color-mix(in srgb, var(--action-color) 12%, transparent); }
+.fiveiso-workspace .roster-player:hover { background: #67e8f918; }
+.fiveiso-workspace .section-heading { border-bottom-color: #d1ecff12; }
+.fiveiso-workspace tr:hover td { background: #b7dfff05; }
+[data-slot='dialog-content'], [data-slot='alert-dialog-content'] {
+  background: radial-gradient(ellipse at 0 0, color-mix(in srgb, var(--section-color, #7ce5ee) 12%, transparent), transparent 75%), #141d2aef;
+  border: 1px solid color-mix(in srgb, var(--section-color, #7ce5ee) 28%, #ffffff12);
+  border-radius: 6px; backdrop-filter: blur(28px) saturate(130%);
+  box-shadow: inset 0 1px #ffffff18, 0 30px 100px #02050ccc;
+}
+.owner-shell { grid-template-columns: 228px minmax(0, 1fr); }
+:is([data-slot='dialog-content'], [data-slot='alert-dialog-content']) :is([data-slot='input'], [data-slot='select-trigger']) {
+  min-height: 42px; border-radius: 5px; background: #283442c9; border-color: #bbd7ec25;
+}
+:is([data-slot='dialog-content'], [data-slot='alert-dialog-content']) [data-slot='button'] { min-height: 42px; border-radius: 5px; }
+[data-slot='dialog-content'] [data-slot='dialog-close'] { min-height: 28px; }
+.owner-nav a { min-height: 42px; gap: 12px; }
+.owner-nav a:first-of-type { box-shadow: inset 2px 0 var(--section-color); }
+@media (max-width: 800px) {
+  .fiveiso-workspace .page-content { padding: 22px 18px; }
+  .owner-shell { display: block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fiveiso-workspace *, .owner-shell * { transition-duration: 0s !important; }
+}
+
+/* Shared directory toolbar and profile detail composition. */
+.fiveiso-workspace .directory-toolbar { width: 100%; }
+.fiveiso-workspace .directory-toolbar > .layout-toggle,
+.fiveiso-workspace .directory-toolbar > .toolbar-end { margin-left: auto; }
+.fiveiso-workspace .toolbar-end { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.fiveiso-workspace .toolbar-end .layout-toggle { margin-left: 0; }
+.fiveiso-workspace .profile-detail .profile-layout { grid-template-columns: minmax(0, 1fr) minmax(300px, 350px); gap: 22px; align-items: start; }
+.fiveiso-workspace .profile-detail .profile-information,
+.fiveiso-workspace .profile-detail .player-actions { background: linear-gradient(145deg,#5b2c694f,#11131eef 75%); border: 1px solid #dab9ef29; border-radius: 8px; padding: 24px; }
+.fiveiso-workspace .profile-detail .profile-information { position: relative; padding-left: 82px; min-height: 680px; }
+.fiveiso-workspace .profile-detail .profile-heading { margin: 0 0 24px; padding: 0 0 20px; border-bottom: 1px solid #ffffff0c; gap: 14px; }
+.fiveiso-workspace .profile-detail .profile-heading h2 { font-size: 16px; }
+.fiveiso-workspace .profile-detail .profile-heading p { font-size: 12px; }
+.fiveiso-workspace .profile-detail .character-avatar.large { width: 52px; height: 52px; font-size: 18px; flex-shrink: 0; }
+.fiveiso-workspace .profile-detail .profile-information [data-slot='tabs-list'] { position: absolute; left: 12px; top: 104px; width: 48px; flex-direction: column; gap: 16px; border: 0; margin: 0; }
+.fiveiso-workspace .profile-detail .profile-information [data-slot='tabs-trigger'] { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; gap: 0; font-size: 0; line-height: 0; flex: none; border-radius: 9px; color: #a9a2be; }
+.fiveiso-workspace .profile-detail .profile-information [data-slot='tabs-trigger'] svg { width: 20px; height: 20px; flex-shrink: 0; }
+.fiveiso-workspace .profile-detail .profile-information [data-slot='tabs-trigger'][data-active] { background: #983aeb; color: #fff; box-shadow: 0 0 20px #a337e955; }
+.fiveiso-workspace .profile-detail .profile-section-title { font-size: 20px; font-weight: 600; margin-bottom: 18px; }
+.fiveiso-workspace .profile-detail .profile-panels { grid-template-columns: minmax(0, .95fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
+.fiveiso-workspace .profile-detail .profile-card { padding: 20px; border-radius: 8px; background: linear-gradient(145deg,#752d7d55,#161321bf); border: 1px solid #ffffff0a; }
+.fiveiso-workspace .profile-detail .profile-card.purple { grid-column: 1; grid-row: 1; }
+.fiveiso-workspace .profile-detail .profile-card.blue { grid-column: 2; grid-row: 1 / span 3; align-self: stretch; }
+.fiveiso-workspace .profile-detail .profile-card.amber { grid-column: 1; grid-row: 2; }
+.fiveiso-workspace .profile-detail .profile-card.green { grid-column: 1; grid-row: 3; }
+.fiveiso-workspace .profile-detail .profile-card h3 { font-size: 17px; font-weight: 500; margin-bottom: 16px; }
+.fiveiso-workspace .profile-detail .profile-field { gap: 7px; border: 0; padding: 8px 0; }
+.fiveiso-workspace .profile-detail .profile-field strong { display: block; background: #090b1666; padding: 9px 11px; border-radius: 5px; min-height: 36px; font-size: 13px; }
+.fiveiso-workspace .profile-detail .profile-card.purple .profile-field:nth-of-type(2n) strong { background: #50749635; }
+.fiveiso-workspace .profile-detail .player-actions h3 { padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid #ffffff0c; font-size: 20px; }
+.fiveiso-workspace .profile-detail .action-tiles { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.fiveiso-workspace .profile-detail .action-tile { --tile:#a152d6; height: auto; min-height: 94px; aspect-ratio: 1; width: 100%; padding: 12px 5px; font-size: 11px; line-height: 1.4; white-space: normal; border-radius: 8px; border: 1px solid #ffffff20; color: #fff; background: linear-gradient(150deg,color-mix(in srgb,var(--tile) 90%,white),color-mix(in srgb,var(--tile) 68%,#15101b)); display:flex; flex-direction:column; justify-content:center; gap:12px; }
+.fiveiso-workspace .profile-detail .action-tile svg { width: 30px; height: 30px; stroke-width: 2; }
+.fiveiso-workspace .profile-detail .action-tile.tone-0 { --tile:#83b744; }
+.fiveiso-workspace .profile-detail .action-tile.tone-1 { --tile:#e77883; }
+.fiveiso-workspace .profile-detail .action-tile.tone-2 { --tile:#e13d45; }
+.fiveiso-workspace .profile-detail .action-tile.tone-3 { --tile:#4fb3b8; }
+.fiveiso-workspace .profile-detail .action-tile.tone-4 { --tile:#9d37ec; }
+.fiveiso-workspace .profile-detail .action-tile.tone-5 { --tile:#b2a153; }
+.fiveiso-workspace .profile-detail .action-tile.orange { --tile:#ed925b; }
+.fiveiso-workspace .profile-detail .action-tile.red { --tile:#e23d51; }
+.fiveiso-workspace .profile-detail .action-tile:not(:disabled):hover { filter: brightness(1.15); transform: translateY(-2px); }
+@media(max-width:1100px) {
+ .fiveiso-workspace .profile-detail .profile-layout { grid-template-columns: minmax(0,1fr); }
+ .fiveiso-workspace .profile-detail .player-actions .action-tiles { grid-template-columns: repeat(auto-fit,minmax(90px,1fr)); }
+}
+@media(max-width:650px) {
+ .fiveiso-workspace .toolbar-end { flex-wrap:wrap; }
+ .fiveiso-workspace .profile-detail .profile-information { padding: 16px; }
+ .fiveiso-workspace .profile-detail .profile-information [data-slot='tabs-list'] { position:static; flex-direction:row; width:100%; margin-bottom:16px; }
+ .fiveiso-workspace .profile-detail .profile-panels { grid-template-columns:1fr; }
+ .fiveiso-workspace .profile-detail .profile-panels .profile-card { grid-column:auto; grid-row:auto; }
+}
+.fiveiso-workspace .profile-detail .profile-card.blue { grid-row: 1 / span 2; }
+.fiveiso-workspace .profile-detail .profile-balances { margin-top: 24px; padding-top: 20px; border-top: 1px solid #ffffff10; }
+.fiveiso-workspace .profile-detail .profile-information [data-slot='tabs-trigger']::after { display: none; }
+.fiveiso-workspace .profile-detail .profile-card h3 { flex-wrap: wrap; }
+@media(max-width:650px) { .fiveiso-workspace .profile-detail .profile-card.blue { grid-row: auto; } }
+/* Profile cards share the active section accent, including their controls. */
+.fiveiso-workspace .profile-detail .profile-information,
+.fiveiso-workspace .profile-detail .player-actions { background: linear-gradient(145deg,color-mix(in srgb,var(--section-color) 12%,#171c29),#10131eec); border-color:color-mix(in srgb,var(--section-color) 22%,transparent); }
+.fiveiso-workspace .profile-detail .profile-information [data-slot='tabs-trigger'][data-active] { background:color-mix(in srgb,var(--section-color) 72%,#303040); box-shadow:0 0 20px color-mix(in srgb,var(--section-color) 22%,transparent); }
+.fiveiso-workspace .profile-detail .profile-reference { grid-template-columns:minmax(240px,.95fr) minmax(300px,1.15fr); gap:18px; align-items:stretch; }
+.fiveiso-workspace .profile-detail .profile-reference .profile-card { position:relative; isolation:isolate; overflow:hidden; padding:22px; border-radius:7px; background:linear-gradient(145deg,color-mix(in srgb,var(--section-color) 17%,#1b1c2a),#11141ee8); }
+.fiveiso-workspace .profile-detail .identity-card { grid-column:1;grid-row:1; }
+.fiveiso-workspace .profile-detail .career-card { grid-column:1;grid-row:2; }
+.fiveiso-workspace .profile-detail .character-info-card { grid-column:2;grid-row:1 / span 2; }
+.fiveiso-workspace .profile-detail .profile-reference h3 { font-size:17px;font-weight:500; margin:0 0 18px; }
+.fiveiso-workspace .profile-detail .character-info-card header { display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap; }
+.fiveiso-workspace .profile-detail .character-info-card header small {font-size:10px;color:#a6aabb;margin-bottom:14px; }
+.fiveiso-workspace .profile-detail .identity-field,.fiveiso-workspace .profile-detail .detail-field { display:flex;flex-direction:column;gap:7px; margin:0 0 15px;min-width:0; }
+.fiveiso-workspace .profile-detail :is(.identity-field,.detail-field)>span { font-size:11px;color:#a6a8b8; }
+.fiveiso-workspace .profile-detail :is(.identity-value,.detail-value) { display:flex;align-items:center;gap:9px;min-height:36px;border-radius:5px;padding:7px 10px;background:#090d1766;min-width:0; }
+.fiveiso-workspace .profile-detail .identity-value { background:color-mix(in srgb,var(--section-color) 23%,#20232bbf); }
+.fiveiso-workspace .profile-detail .identity-field:nth-of-type(2) .identity-value {background:color-mix(in srgb,var(--section-color) 17%,#222736c7);}
+.fiveiso-workspace .profile-detail .identity-field:nth-of-type(3) .identity-value {background:color-mix(in srgb,var(--section-color) 12%,#222a32cc);}
+.fiveiso-workspace .profile-detail :is(.identity-value,.detail-value)>svg {width:16px;height:16px;flex-shrink:0;color:#e5e1ef;}
+.fiveiso-workspace .profile-detail :is(.identity-value,.detail-value)>strong {min-width:0;flex:1;font-size:12px;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fiveiso-workspace .profile-detail :is(.identity-value,.detail-value)>button {display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;min-height:28px;padding:4px;border:0;border-radius:4px;background:transparent;color:#eeeaf4;cursor:pointer;}
+.fiveiso-workspace .profile-detail :is(.identity-value,.detail-value)>button svg {width:17px;height:17px;}
+.fiveiso-workspace .profile-detail :is(.identity-value,.detail-value)>button:hover {background:color-mix(in srgb,var(--section-color) 30%,transparent);}
+.fiveiso-workspace .profile-detail .detail-value>button:disabled {opacity:.35;cursor:not-allowed;}
+.fiveiso-workspace .profile-detail .character-info-card .detail-field:nth-of-type(2) .detail-value {background:color-mix(in srgb,var(--section-color) 24%,#151623);}
+.fiveiso-workspace .profile-detail .profile-time-row {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px;}
+.fiveiso-workspace .profile-detail .profile-decoration {position:absolute;pointer-events:none;user-select:none;z-index:-1;object-fit:contain;object-position:bottom right;filter:saturate(.45);}
+.fiveiso-workspace .profile-detail .identity-decoration {width:130px;height:140px;right:-12px;bottom:-17px;opacity:.3;}
+.fiveiso-workspace .profile-detail .career-decoration {width:140px;height:130px;right:-18px;bottom:-18px;opacity:.35;}
+.fiveiso-workspace .profile-detail .character-decoration {width:46%;height:58%;right:-12px;bottom:0;opacity:.32;}
+.profile-gender-select {display:block;width:100%;height:42px;padding:8px;background:#202a3a;border:1px solid #ffffff22;border-radius:5px;}
+@media(max-width:1350px) and (min-width:1101px) { .fiveiso-workspace .profile-detail .profile-layout {grid-template-columns:minmax(0,1fr);} }
+@media(max-width:800px) { .fiveiso-workspace .profile-detail .profile-reference {grid-template-columns:minmax(0,1fr);} .fiveiso-workspace .profile-detail .profile-reference .profile-card {grid-column:auto;grid-row:auto;} }
