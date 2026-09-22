@@ -57,7 +57,7 @@ export function ScreenViewer({serverId, playerId, name}: {
         if (typeof RTCPeerConnection === 'undefined') throw Error('Tarayıcınız canlı görüntüyü desteklemiyor.');
         const config = await api(base);
         if (cancelled) return;
-        if (!config.ready) throw Error('Güncel fiveiso-agent çalışmıyor. Ajanı güncelleyip yeniden başlatın.');
+        if (!config.ready) throw Error('Güncel fiveiso çalışmıyor. Ajanı güncelleyip yeniden başlatın.');
         pc = new RTCPeerConnection({iceServers:config.iceServers});
         pc.addTransceiver('video', {direction:'recvonly'});
         pc.ontrack = event => {

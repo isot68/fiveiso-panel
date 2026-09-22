@@ -499,7 +499,7 @@ export function ControlPanel() {
                                 disabled={
                                   !canAction(r.state === 'started' ? 'restart' : 'start') ||
                                   !server.online ||
-                                  r.name === 'fiveiso-agent'
+                                  r.name === 'fiveiso'
                                 }
                                 onClick={() =>
                                   ask({
@@ -522,7 +522,7 @@ export function ControlPanel() {
                                   disabled={
                                     !canAction('stop') ||
                                     !server.online ||
-                                    r.name === 'fiveiso-agent'
+                                    r.name === 'fiveiso'
                                   }
                                   onClick={() =>
                                     ask({ type: 'stop', target: r.name })
@@ -717,7 +717,7 @@ export function ControlPanel() {
                   </Button>}
                 </div>
                 {!server?.capabilities?.includes('setJoinLock') && (
-                  <p className="text-sm text-amber-200 mt-4">Bu ayar için güncel fiveiso-agent sürümünü sunucuya kurun.</p>
+                  <p className="text-sm text-amber-200 mt-4">Bu ayar için güncel fiveiso sürümünü sunucuya kurun.</p>
                 )}
               </section>
               <section className="surface p-6">
@@ -736,7 +736,7 @@ export function ControlPanel() {
                   <li>Yönetici hesabınla yerel panele giriş yap.</li>
                   <li>Sunucu ekle ve o sunucu için üretilen anahtarı al.</li>
                   <li>
-                    fiveiso-agent kaynağını FiveM sunucusuna kopyala; merkez
+                    fiveiso kaynağını FiveM sunucusuna kopyala; merkez
                     adresini, sunucu kimliğini ve anahtarı tanımla.
                   </li>
                   <li>
@@ -804,7 +804,7 @@ export function ControlPanel() {
                   ? 'Anahtar yalnızca şimdi gösterilir. Güvenli bir yere kaydet.'
                   : 'Demo anahtarıdır; gerçek bağlantı kurulmaz.'}
               </p>
-              <pre className="break-all whitespace-pre-wrap bg-background p-4 rounded-lg text-xs">{`set fiveiso_server_id "${credentials.id}"\nset fiveiso_token "${credentials.token}"\nset fiveiso_url "https://MERKEZ-ADRESIN"\nensure fiveiso-agent`}</pre>
+              <pre className="break-all whitespace-pre-wrap bg-background p-4 rounded-lg text-xs">{`set fiveiso_server_id "${credentials.id}"\nset fiveiso_token "${credentials.token}"\nset fiveiso_url "https://panel.fiveiso.com"\nadd_ace resource.fiveiso command allow\nensure fiveiso`}</pre>
             </div>
           ) : (
             <form

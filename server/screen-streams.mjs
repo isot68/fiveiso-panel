@@ -63,7 +63,7 @@ export function createScreenStreams({ db, sessions, body, send, audit, secureCoo
         return true;
       }
       if (!match[2] && req.method === 'POST') {
-        if (Date.now() - (agents.get(serverId) || 0) >= 10000) throw fail('Güncel fiveiso-agent çalışmıyor. Ajanı güncelleyip yeniden başlatın.', 409);
+        if (Date.now() - (agents.get(serverId) || 0) >= 10000) throw fail('Güncel fiveiso çalışmıyor. Ajanı güncelleyip yeniden başlatın.', 409);
         const payload = await body(req);
         const srv = db.prepare('SELECT * FROM servers WHERE id=?').get(serverId);
         const target = String(payload.target);

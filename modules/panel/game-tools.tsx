@@ -291,7 +291,7 @@ export function GameTools({
               {module === 'items' && <ItemCatalogFilters items={filtered} filter={itemFilter} onChange={setItemFilter} />}
               <div className="toolbar-end">
               {createAction && canAction(createAction) && <span
-                title={live && !server?.capabilities?.includes(createAction) ? 'Sunucu ajanı bu işlemi henüz bildirmiyor. fiveiso-agent kaynağını yeniden başlatın.' : undefined}
+                title={live && !server?.capabilities?.includes(createAction) ? 'Sunucu ajanı bu işlemi henüz bildirmiyor. fiveiso kaynağını yeniden başlatın.' : undefined}
               ><Button
                 disabled={!server?.online || (live && !server.capabilities?.includes(createAction))}
                 onClick={() => {

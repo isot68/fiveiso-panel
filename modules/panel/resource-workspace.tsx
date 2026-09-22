@@ -85,7 +85,7 @@ export function ResourceWorkspace({
                       variant="ghost"
                       size="icon"
                       disabled={
-                        !server?.online || r.name === 'fiveiso-agent'
+                        !server?.online || r.name === 'fiveiso'
                       }
                       aria-label={
                         r.name +

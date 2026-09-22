@@ -38,7 +38,7 @@ Ana panel: **http://localhost:8080/owner**. Müşteri paneli: **http://localhost
 
 Merkez varsayılan olarak yalnızca `127.0.0.1:8080` dinler. Uzak ajanların merkeze erişmesi gerekir; tarayıcı FiveM sunucularına doğrudan bağlanmaz.
 
-**HTTPS ile:** Merkez önüne bir HTTPS ters vekil koyun. Vekil yerel 8080 portuna iletsin. `.env` içindeki `PANEL_ORIGIN` değerini tam dış adres olarak ayarlayın, örneğin `https://panel.ornek.com` (sonunda / olmadan). Vekil aynı makinedeyse `PANEL_HOST=127.0.0.1` kalabilir. Tarayıcıda da bu adresi kullanın.
+**HTTPS ile:** Merkez önüne bir HTTPS ters vekil koyun. Vekil yerel 8080 portuna iletsin. `.env` içindeki `PANEL_ORIGIN` değerini tam dış adres olarak ayarlayın, örneğin `https://panel.fiveiso.com` (sonunda / olmadan). Vekil aynı makinedeyse `PANEL_HOST=127.0.0.1` kalabilir. Tarayıcıda da bu adresi kullanın.
 
 **Özel ağ / VPN ile:** `PANEL_HOST` değerini merkezin özel ağ IP'si, `PANEL_ORIGIN` değerini tarayıcıdan kullanılan tam adres yapın. Güvenlik duvarında erişimi özel ağa sınırlayın. HTTP yalnızca güvenilen yerel/VPN ağı için desteklenir; internet üzerinden HTTPS kullanın.
 
@@ -47,15 +47,15 @@ Her uzak sunucuda merkez adresi erişilebilir olmalıdır. NAT arkasında özel 
 ## 3. FiveM ajan kurulumu
 
 1. Panelde **Sunucu ekle** seçin. Sunucu kimliğini ve yalnızca bir defa gösterilen anahtarı kaydedin.
-2. `../musteri-scripti/fiveiso-agent` klasörünü ilgili FiveM sunucusunun `resources/[management]/fiveiso-agent` klasörüne kopyalayın. Klasör adı `fiveiso-agent` kalmalıdır.
+2. `../fiveiso` klasörünü ilgili FiveM sunucusunun `resources/[management]/fiveiso` klasörüne kopyalayın. Klasör adı `fiveiso` kalmalıdır.
 3. `server.cfg` içine ekleyin:
 
 ```cfg
-set fiveiso_url "https://panel.ornek.com"
+set fiveiso_url "https://panel.fiveiso.com"
 set fiveiso_server_id "PANELIN_URETTIGI_SUNUCU_KIMLIGI"
 set fiveiso_token "PANELIN_URETTIGI_ANAHTAR"
-add_ace resource.fiveiso-agent command allow
-ensure fiveiso-agent
+add_ace resource.fiveiso command allow
+ensure fiveiso
 ```
 
 Güvenilen yerel/VPN ağında HTTP kullanıyorsanız ayrıca `set fiveiso_allow_http "true"` ekleyin. Anahtarları `setr` ile replike etmeyin. Yapılandırma dosyasını gizli tutun.
@@ -79,7 +79,7 @@ Müşteri hesapları yalnızca kendi alanlarına atanan sunucuları görür. 2FA
 
 ## 5. Konsol ve işlem sonuçları
 
-İşlem konsolu işletim sistemi kabuğu değildir; yazılan tek satırlık komutu `fiveiso-agent` üzerinden FXServer `ExecuteCommand` işlevine gönderir. Örnekler:
+İşlem konsolu işletim sistemi kabuğu değildir; yazılan tek satırlık komutu `fiveiso` üzerinden FXServer `ExecuteCommand` işlevine gönderir. Örnekler:
 
 ```text
 status
@@ -89,7 +89,7 @@ stop qb-housing
 restart qb-housing
 ```
 
-Konsol yazma izni çok güçlüdür ve yalnızca güvenilir hesaplara verilmelidir. `add_ace resource.fiveiso-agent command allow` satırı ajanın kısıtlı FXServer komutlarını da çalıştırabilmesini sağlar. Komutlar işletim sistemi kabuğuna aktarılmaz. Oyuncu uzaklaştırmada ID yanında lisans da eşleştirilir; yeniden kullanılan ID üzerinden farklı oyuncuya işlem uygulanmaz.
+Konsol yazma izni çok güçlüdür ve yalnızca güvenilir hesaplara verilmelidir. `add_ace resource.fiveiso command allow` satırı ajanın kısıtlı FXServer komutlarını da çalıştırabilmesini sağlar. Komutlar işletim sistemi kabuğuna aktarılmaz. Oyuncu uzaklaştırmada ID yanında lisans da eşleştirilir; yeniden kullanılan ID üzerinden farklı oyuncuya işlem uygulanmaz.
 
 Durumlar: `queued` bekliyor, `dispatched` ajana teslim edildi, `completed` ajan başarılı bildirdi, `failed` ajan hata bildirdi, `expired` sonuç zamanında alınamadı. Sonuç belirsizse komut otomatik tekrarlanmaz. 60 saniyeden eski komutlar yeni heartbeat sırasında zaman aşımına alınır. Merkez kesintilerinde geç kalan komutların uygulanmaması tercih edilir. Ban kaydı merkeze hemen kaydedilir; ajan listesi sonraki heartbeat'te güncellenir. Ajan son ban listesini yerel KVP deposunda saklar.
 
@@ -117,7 +117,7 @@ server/index.mjs        HTTP API, oturum ve ajan iş akışları
 server/security.mjs     Parola, anahtar, yetki ve işlem doğrulama
 server/store.mjs        SQLite şeması ve kalıcılık
 server/manage.mjs       Yerel hesap ve anahtar yönetimi
-../musteri-scripti/fiveiso-agent/      FiveM sunucu ajanı
+../fiveiso/      FiveM sunucu ajanı
 scripts/                Hesap açma ve yedekleme
  tests/                 API güvenlik ve entegrasyon testleri
 ```

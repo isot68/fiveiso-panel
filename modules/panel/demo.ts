@@ -35,7 +35,7 @@ export const demoState: PanelState = {
         'pma-voice',
         'qb-policejob',
         'qb-ambulancejob',
-        'fiveiso-agent',
+        'fiveiso',
         'qb-housing',
       ].map((name, j) => ({
         name,

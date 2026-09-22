@@ -65,7 +65,7 @@ export function createPanel({
   const mapBlipActions = new Map();
   const hostStates = new Map();
   const hostCommands = new Map();
-  // Inventory PNGs are relayed by fiveiso-agent and deliberately kept in RAM only.
+  // Inventory PNGs are relayed by fiveiso and deliberately kept in RAM only.
   const inventoryImages = new Map();
   const dummy = hashPassword(token());
   const send = (res, status, data) => {

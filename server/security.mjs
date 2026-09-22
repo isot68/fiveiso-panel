@@ -53,12 +53,12 @@ export function validateAction(action, snapshot) {
     action.type === 'consoleCommand' &&
     !snapshot.capabilities?.includes('consoleCommand')
   )
-    throw Error('fiveiso-agent konsol komutlarını desteklemiyor; ajanı güncelleyin.');
+    throw Error('fiveiso konsol komutlarını desteklemiyor; ajanı güncelleyin.');
   if (['start', 'stop', 'restart'].includes(action.type)) {
     if (
       typeof action.target !== 'string' ||
       !/^[a-zA-Z0-9_.-]{1,80}$/.test(action.target) ||
-      action.target === 'fiveiso-agent' ||
+      action.target === 'fiveiso' ||
       !snapshot.resources?.some((r) => r.name === action.target)
     )
       throw Error('Kaynak geçersiz veya korumalı.');

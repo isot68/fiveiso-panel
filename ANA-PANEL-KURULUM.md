@@ -29,7 +29,7 @@ npm run center
 3. **Kullanıcı oluştur** ile o müşteriye admin hesabı açın. Parolayı müşteriye kendi güvenli kanalınızdan iletin.
 4. **Sunucu ekle** ile ajan kimliği/anahtarı üretin. Ardından **Sunucu atamaları** alanından müşteriye atayın. Yeni sunucu ilk olarak “Mevcut çalışma alanı” altında oluşur.
 5. Müşteriye kendi merkez adresinizin `/panel` bağlantısını verin.
-6. Her FiveM sunucusunda `../musteri-scripti/fiveiso-agent` klasörünü kurup kendi sunucu anahtarını tanımlayın.
+6. Her FiveM sunucusunda `../fiveiso` klasörünü kurup kendi sunucu anahtarını tanımlayın.
 
 Merkez sizin ana makinenizde kalır. Kullanıcılara merkez kaynaklarını, SQLite veritabanını veya owner hesabını vermeyin. Müşteriler tarayıcı erişimi kullanır; kendilerine ait FiveM sunucusuna yalnızca ajan kurulur. Alan adı/HTTPS veya VPN gereksinimleri KURULUM.md içinde açıklanmıştır.
 
@@ -70,8 +70,8 @@ Bu olay için varsayılan tahmin yapılmaz. Standart iyileştirme can değerini 
 - `modules/panel/team-manager.tsx`: müşteri ekip yönetimi.
 - `server/tenancy.mjs`: müşteri izolasyonu, paketler ve süreler.
 - `server/game-actions.mjs`: oyun işlemi doğrulama ve modül bazlı veri süzme.
-- `../musteri-scripti/fiveiso-agent/bridge.lua`: Qbox, QBCore ve ESX adaptörleri.
-- `../musteri-scripti/fiveiso-agent/client.lua`: oyun istemcisi işlemleri ve sonuç bildirimi.
+- `../fiveiso/bridge.lua`: Qbox, QBCore ve ESX adaptörleri.
+- `../fiveiso/client.lua`: oyun istemcisi işlemleri ve sonuç bildirimi.
 
 Önceki veritabanı korunur. Yeni müşteri tabloları ilk başlatmada eklenir; mevcut sunucu ve hesaplar “Mevcut çalışma alanı” altında kalır. İlk yükseltmeden önce veritabanını yedekleyin.
 

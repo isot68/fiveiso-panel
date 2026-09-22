@@ -1,6 +1,6 @@
 -- Isolated adapter tests. No FXServer or real SQL connection is used here.
 local kind=arg[1] or 'qb'
-local agentPath=arg[2] or '../musteri-scripti/fiveiso-agent/'
+local agentPath=arg[2] or '../fiveiso/'
 local now=100;os.time=function()return now end
 local players={};local updateCount=1
 local lastQuery,lastParams;local mode='search'

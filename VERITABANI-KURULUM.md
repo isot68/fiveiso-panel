@@ -15,10 +15,10 @@ Owner `/panel` üzerinden tüm sunuculara ulaşabilir. Aktif lisanslı müşteri
 
 ## Kurulum
 
-1. `musteri-scripti/fiveiso-agent` klasörünü sunucunuzun `resources/[management]/` dizinine kopyalayın. Resource adı `fiveiso-agent` kalsın.
+1. `fiveiso` klasörünü sunucunuzun `resources/[management]/` dizinine kopyalayın. Resource adı `fiveiso` kalsın.
 2. Var olan `mysql_connection_string` ayarınızı kullanın. Framework tablolarını yeniden içeri aktarmayın; bu paket mevcut tabloları silmez veya yeniden oluşturmaz.
-3. `fiveiso-agent/database-config.lua` dosyasında framework ve garaj sütun eşlemesini kontrol edin.
-4. `server.cfg` sırası: `ensure oxmysql`, kullandığınız framework, garaj/envanter kaynakları, en son `ensure fiveiso-agent`.
+3. `fiveiso/database-config.lua` dosyasında framework ve garaj sütun eşlemesini kontrol edin.
+4. `server.cfg` sırası: `ensure oxmysql`, kullandığınız framework, garaj/envanter kaynakları, en son `ensure fiveiso`.
 5. Owner panelden oluşturduğunuz sunucu kimliğini ve anahtarını müşteri scriptinin örnek bağlantı ayarlarına yazın.
 6. Konsolda `[FiveISO SQL] ... bağlantısı hazır.` mesajını kontrol edin. Eksik garaj sütunu varsa yalnızca garaj SQL modülü kapanır.
 7. Müşteri panelinde Karakter hesapları, Para yönetimi veya Araçlar sayfasındaki **Kayıtlı ...** bölümünden sorgulayın.

@@ -49,7 +49,7 @@ const snapshot = {
   players: [{ id: '1', name: 'Arda', ping: 35, license: 'license:123' }],
   resources: [
     { name: 'qb-core', state: 'started' },
-    { name: 'fiveiso-agent', state: 'started' },
+    { name: 'fiveiso', state: 'started' },
   ],
   maxPlayers: 128,
   uptime: 60,
@@ -341,7 +341,7 @@ test('sunucu izolasyonu, güvenli kaynak işlemi ve ajan onayı', async (t) => {
     (
       await request(
         `/servers/${a.id}/actions`,
-        { type: 'restart', target: 'fiveiso-agent' },
+        { type: 'restart', target: 'fiveiso' },
         admin,
       )
     ).status,
