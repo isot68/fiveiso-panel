@@ -255,6 +255,14 @@ test('parola tuzlama ve doğrulama', () => {
   assert.equal(verifyPassword('test-password-123', h), true);
   assert.equal(verifyPassword('incorrect', h), false);
 });
+test('giriş sınırı vekilden gelen gerçek istemci IP adresine göre uygulanır', async (t) => {
+  const { request } = await fixture(t);
+  const credentials = { username: 'owner', password: 'wrong' };
+  for (let attempt = 0; attempt < 8; attempt++)
+    assert.equal((await request('/login', credentials, '', { 'X-Real-IP': '198.51.100.1' })).status, 401);
+  assert.equal((await request('/login', credentials, '', { 'X-Real-IP': '198.51.100.1' })).status, 429);
+  assert.equal((await request('/login', { username: 'owner', password: 'test-password-123' }, '', { 'X-Real-IP': '198.51.100.2' })).status, 200);
+});
 test('giriş, CSRF, yetki ve oturum sonlandırma', async (t) => {
   const { request, login } = await fixture(t);
   assert.equal((await request('/state')).status, 401);

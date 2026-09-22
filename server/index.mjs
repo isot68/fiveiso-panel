@@ -18,6 +18,7 @@ import {
   hasPermission,
 } from './tenancy.mjs';
 import { createServer } from 'node:http';
+import { isIP } from 'node:net';
 import { randomUUID } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
@@ -326,7 +327,10 @@ export function createPanel({
         return;
       }
       if (path === '/api/login' && req.method === 'POST') {
-        const ip = req.socket.remoteAddress;
+        const forwardedIp = req.headers['x-real-ip'];
+        const ip = req.socket.remoteAddress === '127.0.0.1' &&
+          typeof forwardedIp === 'string' && isIP(forwardedIp)
+          ? forwardedIp : req.socket.remoteAddress;
         const now = Date.now();
         for (const [key, item] of attempts)
           if (item.until < now) attempts.delete(key);
