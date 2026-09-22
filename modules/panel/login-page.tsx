@@ -27,9 +27,9 @@ export function LoginPage({ busy, onLogin }: { busy: boolean; onLogin: (username
   }, []);
   const discordUrl = `/api/auth/discord/start${invite ? `?invite=${encodeURIComponent(invite.trim())}` : ''}`;
   return <main className="fiveiso-login">
-    <a href="/" className="login-home"><ArrowLeft size={16} /> Ana sayfa</a>
+    <a href="https://fiveiso.com/" className="login-home"><ArrowLeft size={16} /> Ana sayfa</a>
     <div className="login-shell">
-      <a href="/" className="login-logo"><Layers size={32} /> FiveISO</a>
+      <a href="https://fiveiso.com/" className="login-logo"><Layers size={32} /> FiveISO</a>
       <section className="login-card">
         <span className="login-eyebrow">KONTROL MERKEZİ</span>
         <h1>Tekrar hoş geldin.</h1>

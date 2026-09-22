@@ -102,7 +102,7 @@ export function TeamManager({ request, onSaved, options, users, roles, manager, 
         setBusy(true);
         try {
           const result = await request('/team/discord-invites', { roleId: inviteRoleId }) as { invite: string };
-          const link = new URL('/panel', window.location.origin);
+          const link = new URL(window.location.hostname === 'panel.fiveiso.com' ? '/' : '/panel', window.location.origin);
           link.searchParams.set('invite', result.invite);
           setInviteLink(link.href);
           notify('Discord daveti oluşturuldu.', 'success');

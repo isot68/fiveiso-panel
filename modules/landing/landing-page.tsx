@@ -11,6 +11,7 @@ const features = [
   { icon: Shield, title: 'Ekip yetkileri', text: 'Her ekip üyesine ihtiyacı olan bölümleri ve işlemleri aç.', color: '#db96b3' },
   { icon: Activity, title: 'İşlem kayıtları', text: 'Ekip işlemlerini, sonuçlarını ve sunucu durumunu takip et.', color: '#91aee8' },
 ];
+const panelUrl = 'https://panel.fiveiso.com/';
 export function LandingPage() {
   useScrollMemory('fiveiso:scroll:landing', true);
   const root = useRef<HTMLDivElement>(null);
@@ -33,7 +34,7 @@ export function LandingPage() {
     <header className="landing-nav landing-width">
       <a href="/" className="landing-brand" aria-label="FiveISO ana sayfa"><Layers size={26} strokeWidth={2.2} /> FiveISO<span>®</span></a>
       <nav aria-label="Ana menü"><a href="#ozellikler">Özellikler</a><a href="#panel">Panel</a><a href="#sorular">Sıkça sorulanlar</a></nav>
-      <div className="landing-nav-actions"><a href="/panel" className="landing-button landing-button-small landing-button-outline">Panele giriş <ArrowUpRight size={17} /></a><button type="button" className="landing-button landing-button-small" onClick={() => setPurchase(true)}>Satın al <ArrowUpRight size={17} /></button></div>
+      <div className="landing-nav-actions"><a href={panelUrl} className="landing-button landing-button-small landing-button-outline">Panele giriş <ArrowUpRight size={17} /></a><button type="button" className="landing-button landing-button-small" onClick={() => setPurchase(true)}>Satın al <ArrowUpRight size={17} /></button></div>
     </header>
     {purchase && <div className="landing-purchase-overlay" onClick={() => setPurchase(false)}><section role="dialog" aria-modal="true" aria-labelledby="purchase-title" className="landing-purchase-dialog" onClick={(event) => event.stopPropagation()}><h2 id="purchase-title">FiveISO satın al</h2><p>Satış bağlantısı henüz tanımlanmadı.</p><button autoFocus className="landing-button" onClick={() => setPurchase(false)} onKeyDown={(event) => { if (event.key === 'Escape') setPurchase(false); }}>Kapat</button></section></div>}
     <main>
@@ -41,7 +42,7 @@ export function LandingPage() {
         <div className="landing-kicker"><span /> FIVEM SUNUCU YÖNETİMİ</div>
         <h1>Sunucun senin.<br /><span>Kontrol sende.</span></h1>
         <p>Oyuncuların, ekibin ve sunucu işlemlerin.<br />Hepsini tek bir merkezden yönet.</p>
-        <div className="landing-actions"><a className="landing-button" href="/panel">Kontrol merkezine gir <ArrowUpRight size={19} /></a><a className="landing-link" href="#panel">Paneli keşfet <ArrowRight size={18} /></a></div>
+        <div className="landing-actions"><a className="landing-button" href={panelUrl}>Kontrol merkezine gir <ArrowUpRight size={19} /></a><a className="landing-link" href="#panel">Paneli keşfet <ArrowRight size={18} /></a></div>
         <div className="landing-platforms"><span>FiveISO AGENT İLE BAĞLANIR</span><b>FiveM</b><i /><b>QBCore</b><i /><b>Qbox</b></div>
       </section>
       <section id="panel" className="landing-preview-section landing-width" aria-label="Panel önizlemesi">
@@ -56,16 +57,16 @@ export function LandingPage() {
         </div>
       </section>
       <section id="ozellikler" className="landing-features landing-width"><div className="landing-section-title"><span className="landing-kicker">TEK BİR ÇALIŞMA ALANI</span><h2>Yönetimin her parçası.<br /><span>Aynı merkezde.</span></h2><p>Sunucu yönetiminde kullandığın araçlar, FiveISO düzeniyle bir arada.</p></div><div className="landing-feature-grid">{features.map(({ icon: Icon, title, text, color }) => <article key={title}><span className="landing-feature-icon" style={{ color }}><Icon size={25} strokeWidth={1.8} /></span><h3>{title}</h3><p>{text}</p></article>)}</div></section>
-      <section className="landing-connection landing-width"><div><span className="landing-kicker">SUNUCUDAN MERKEZE</span><h2>Bağla. Yönet.<br /><span>Kontrolü elinde tut.</span></h2><p>FiveISO Agent sunucun ile panel arasında bağlantı kurar. Ekip üyeleri yetkileri dahilinde tarayıcıdan işlemlerini yürütür.</p><a className="landing-link" href="/panel">Çalışma alanını aç <ArrowUpRight size={18} /></a></div><div className="landing-flow"><div><Server /><strong>FiveM sunucun</strong><span>FiveISO Agent</span></div><span className="flow-line" /><div><Layers /><strong>FiveISO</strong><span>Kontrol merkezi</span></div></div></section>
+      <section className="landing-connection landing-width"><div><span className="landing-kicker">SUNUCUDAN MERKEZE</span><h2>Bağla. Yönet.<br /><span>Kontrolü elinde tut.</span></h2><p>FiveISO Agent sunucun ile panel arasında bağlantı kurar. Ekip üyeleri yetkileri dahilinde tarayıcıdan işlemlerini yürütür.</p><a className="landing-link" href={panelUrl}>Çalışma alanını aç <ArrowUpRight size={18} /></a></div><div className="landing-flow"><div><Server /><strong>FiveM sunucun</strong><span>FiveISO Agent</span></div><span className="flow-line" /><div><Layers /><strong>FiveISO</strong><span>Kontrol merkezi</span></div></div></section>
       <section id="sorular" className="landing-faq landing-width"><div className="landing-section-title"><span className="landing-kicker">SIKÇA SORULANLAR</span><h2>Aklındaki sorular.</h2></div>{[
         ['FiveISO nasıl çalışır?', 'Sunucundaki FiveISO Agent, sunucu bilgilerini merkeze iletir ve yetkili panel işlemlerini sunucuda uygular.'],
         ['Ekibime farklı yetkiler verebilir miyim?', 'Evet. Ekip üyelerinin görebileceği bölümleri ve gerçekleştirebileceği işlemleri ayrı ayrı belirleyebilirsin.'],
         ['Paneli kullanmak için oyunda olmam gerekiyor mu?', 'Hayır. Merkez hesabınla tarayıcıdan giriş yapabilirsin. Canlı sunucu işlemleri için ajan bağlantısının açık olması gerekir.'],
         ['Sunucuyu panelden açıp kapatabilir miyim?', 'Sunucudan bağımsız çalışan FiveISO Host bağlı olduğunda başlatma, durdurma ve yeniden başlatma işlemlerini kullanabilirsin.'],
       ].map(([question, answer]) => <details key={question}><summary>{question}<ChevronDown size={18} /></summary><p>{answer}</p></details>)}</section>
-      <section className="landing-cta landing-width"><Layers size={32} /><h2>Sunucunun yeni<br /><span>kontrol merkezi.</span></h2><a className="landing-button" href="/panel">FiveISO'a giriş yap <ArrowUpRight size={19} /></a></section>
+      <section className="landing-cta landing-width"><Layers size={32} /><h2>Sunucunun yeni<br /><span>kontrol merkezi.</span></h2><a className="landing-button" href={panelUrl}>FiveISO'a giriş yap <ArrowUpRight size={19} /></a></section>
     </main>
-    <footer className="landing-footer landing-width"><a href="/" className="landing-brand"><Layers size={21} /> FiveISO</a><span>© {new Date().getFullYear()} FiveISO</span><a href="/panel">Panel <ArrowUpRight size={15} /></a></footer>
+    <footer className="landing-footer landing-width"><a href="/" className="landing-brand"><Layers size={21} /> FiveISO</a><span>© {new Date().getFullYear()} FiveISO</span><a href={panelUrl}>Panel <ArrowUpRight size={15} /></a></footer>
   </div>;
 }
 
