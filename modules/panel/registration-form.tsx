@@ -21,7 +21,13 @@ export function RegistrationForm({ onBack }: { onBack: () => void }) {
       else {setChallenge(data.id!);setEmail(String(values.get('email')));}
     }catch(e){setError((e as Error).message);}finally{setBusy(false);}
   }
-  if(done)return <><ShieldCheck size={35} className="text-primary"/><h1>Kayıt başarılı.</h1><p>E-posta adresin doğrulandı. Hesabınla giriş yapabilirsin. Sunucu ve paket erişimini FiveISO yöneticisi tanımlar.</p><button type="button" className="login-submit" onClick={onBack}>Giriş yap <ArrowRight size={18}/></button></>;
+  if(done)return <div className="registration-success">
+    <span className="registration-success-icon" aria-hidden="true"><ShieldCheck size={30}/></span>
+    <h1>Kayıt başarılı.</h1>
+    <p>E-posta adresin doğrulandı.<br/>Hesabınla giriş yapabilirsin.</p>
+    <button type="button" className="login-submit" onClick={onBack}>Giriş yap <ArrowRight size={18}/></button>
+    <p className="registration-success-note">Sunucu ve paket erişimini FiveISO yöneticisi tanımlar.</p>
+  </div>;
   return <><span className="login-eyebrow">FIVEISO HESABI</span><h1>{challenge?'E-postanı doğrula.':'Hesabını oluştur.'}</h1><p>{challenge?`${email} adresine gönderilen 6 haneli kodu gir. Kod 10 dakika geçerli.`:'Doğrulama kodunu e-posta adresine göndereceğiz.'}</p>
     {enabled===false&&<p className="login-error" role="status">E-posta ile kayıt henüz etkinleştirilmedi. Lütfen daha sonra tekrar dene.</p>}
     <form onSubmit={submit}>
