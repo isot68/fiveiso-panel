@@ -121,7 +121,7 @@ export function LocationMap({
   useEffect(() => { requestRef.current = request; });
   useEffect(() => {
     let active = true;
-    fetch('/assets/blips/catalog.json').then((response) => {
+    fetch('/assets/blips/catalog.json?v=webp').then((response) => {
       if (!response.ok) throw Error('Blip kataloğu yüklenemedi.');
       return response.json() as Promise<BlipCatalog>;
     }).then((data) => { if (active) setCatalog(data); }).catch((error) => {
