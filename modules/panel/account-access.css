@@ -1,0 +1,121 @@
+.account-access {
+  margin-bottom: 22px;
+  border: 1px solid #b9dbef22;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #22344480, #191d2bbf);
+  color: #e3edf6;
+  overflow: hidden;
+}
+.account-workspace {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.account-workspace label {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  color: #9fc4d2;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.account-workspace select {
+  min-width: 0;
+  max-width: 100%;
+  flex: 1;
+  border: 1px solid #b9dbef25;
+  border-radius: 7px;
+  padding: 9px 12px;
+  color: #d9e7f3;
+  background: #121c2b;
+  font-size: 12px;
+}
+.account-invitations {
+  padding: 19px 20px;
+  border-top: 1px solid #b9dbef18;
+}
+.account-invitations h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 15px;
+  font-size: 14px;
+  color: #bca1e9;
+}
+.account-invitations h2 span {
+  font-size: 11px;
+  background: #b889f51c;
+  padding: 3px 7px;
+  border-radius: 5px;
+}
+.account-invitations article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+  border-top: 1px solid #b9dbef12;
+}
+.account-invitations article strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.account-invitations article p {
+  font-size: 12px;
+  color: #a9b7c9;
+  margin: 5px 0;
+  line-height: 1.7;
+}
+.account-invitations small {
+  color: #8797ae;
+  font-size: 10px;
+}
+.account-invite-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.account-invite-actions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #b9dbef25;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  color: #aebed0;
+  background: #ffffff04;
+  cursor: pointer;
+}
+.account-invite-actions .accept {
+  background: #65d8aa13;
+  border-color: #65d8aa40;
+  color: #65d8aa;
+}
+.account-invite-actions button:disabled {
+  opacity: 0.5;
+}
+.account-access :is(button, select):focus-visible {
+  outline: 2px solid #61dce6;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .account-workspace {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 15px;
+  }
+  .account-invitations {
+    padding: 17px 15px;
+  }
+  .account-invitations article {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .account-invite-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+}

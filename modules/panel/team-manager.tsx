@@ -1,3 +1,4 @@
+import { TeamInvitations } from './team-invitations';
 'use client';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
@@ -6,9 +7,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { notify } from '@/components/ui/toast-center';
 
 type Role = { id: string; name: string; permissions: string[] };
-type Member = { username: string; manager: boolean; permissions: string[]; roleId?: string | null; roleName?: string | null };
+type Member = { invited?: boolean; username: string; manager: boolean; permissions: string[]; roleId?: string | null; roleName?: string | null };
 type Props = {
-  request: (path: string, body: unknown) => Promise<unknown>;
+  request: (path: string, body?: unknown) => Promise<unknown>;
   onSaved: () => Promise<void>;
   options: Record<string, string>;
   users: Member[];
@@ -51,6 +52,7 @@ export function TeamManager({ request, onSaved, options, users, roles, manager, 
   const [inviteLink, setInviteLink] = useState('');
   const [busy, setBusy] = useState(false);
   const editing = users.some((member) => member.username === username);
+  const invitedMember = users.find(member => member.username === username)?.invited;
 
   function selectMember(member?: Member) {
     setUsername(member?.username || '');
@@ -65,6 +67,7 @@ export function TeamManager({ request, onSaved, options, users, roles, manager, 
   }
 
   return <div className="p-5 border-b space-y-7">
+    {manager && <TeamInvitations request={request} onSaved={onSaved} />}
     {manager && <section className="space-y-4">
       <div>
         <h3 className="font-semibold">Roller</h3>
@@ -134,7 +137,7 @@ export function TeamManager({ request, onSaved, options, users, roles, manager, 
       }}>
         <div className="grid md:grid-cols-2 gap-3">
           <Input value={username} onChange={(event) => setUsername(event.target.value)} readOnly={editing} aria-label="Kullanıcı adı" placeholder="Kullanıcı adı" required pattern="[a-zA-Z0-9_.-]{3,40}" />
-          <Input value={password} onChange={(event) => setPassword(event.target.value)} aria-label="Yeni parola" placeholder={editing ? 'Yeni parola (değişmeyecekse boş)' : 'Parola (en az 12 karakter)'} type="password" minLength={12} required={!editing} autoComplete="new-password" />
+          {!invitedMember && <Input value={password} onChange={(event) => setPassword(event.target.value)} aria-label="Yeni parola" placeholder={editing ? 'Yeni parola (değişmeyecekse boş)' : 'Parola (en az 12 karakter)'} type="password" minLength={12} required={!editing} autoComplete="new-password" />}
         </div>
         {manager && roles.length > 0 && <div className="space-y-2">
           <span className="text-sm font-medium">Üye rolü</span>
@@ -145,7 +148,7 @@ export function TeamManager({ request, onSaved, options, users, roles, manager, 
         </div>}
         {roleId ? <p className="text-sm text-muted-foreground">{roles.find((role) => role.id === roleId)?.name} rolünün yetkileri uygulanacak.</p>
           : <PermissionPicker options={options} value={permissions} onChange={setPermissions} />}
-        <div><Button type="submit" disabled={busy}>{busy ? 'Kaydediliyor…' : 'Üyeyi kaydet'}</Button></div>
+        <div className="flex flex-wrap gap-3"><Button type="submit" disabled={busy}>{busy ? 'Kaydediliyor…' : 'Üyeyi kaydet'}</Button>{invitedMember && manager && <Button type="button" variant="destructive" disabled={busy} onClick={async()=>{setBusy(true);try{await request('/team/members/remove',{username});selectMember();await onSaved();notify('Üyenin panel erişimi kaldırıldı.','success');}catch(e){notify((e as Error).message,'error');}finally{setBusy(false);}}}>Panelden çıkar</Button>}</div>
       </form>
     </section>
   </div>;

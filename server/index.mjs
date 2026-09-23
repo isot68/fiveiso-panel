@@ -1,6 +1,7 @@
+import { createPanelInvitations, teamMembers } from './panel-invitations.mjs';
 import { accountSummary } from './account-summary.mjs';
 import { createRegistration } from './registration.mjs';
-import { deleteOwnerRecord, updateOwnerServer } from './owner-management.mjs';
+import { deleteOwnerRecord, updateOwnerServer, grantUserLicense } from './owner-management.mjs';
 import { migrateLicenses, authorizeAgent, activateLicense, licenseManager, licenseStatus, revokeLicense, createResourcePackage, downloadResourcePackage } from './licensing.mjs';
 import { DB_ACTIONS } from './database-actions.mjs';
 import { createScreenStreams } from './screen-streams.mjs';
@@ -11,6 +12,7 @@ import {
   ACTION_FEATURE,
   migrateTenancy,
   tenantFor,
+  primaryTenant,
   activeTenant,
   access,
   cleanFeatures,
@@ -55,6 +57,7 @@ export function createPanel({
   migrateTenancy(db);
   migrateLicenses(db);
   const registrations = createRegistration(db, registration);
+  const invitations = createPanelInvitations(db, {sendMail: registrations.sendInvitation, origin, audit});
   const discordClientId = discord.clientId ?? process.env.DISCORD_CLIENT_ID;
   const discordClientSecret = discord.clientSecret ?? process.env.DISCORD_CLIENT_SECRET;
   const discordRedirectUri = discord.redirectUri ?? process.env.DISCORD_REDIRECT_URI ?? `${origin}/api/auth/discord/callback`;
@@ -699,6 +702,12 @@ export function createPanel({
         send(res, 200, { ok: true });
         return;
       }
+      if (path === '/api/account/invitations/respond' && req.method === 'POST') {
+        send(res, 200, invitations.respond(user, await body(req))); return;
+      }
+      if (path === '/api/account/workspace' && req.method === 'POST') {
+        send(res, 200, invitations.switchWorkspace(user, await body(req))); return;
+      }
       if (user.role !== 'owner' && !activeTenant(tenantFor(db, user)))
         throw fail('Panel erişimi durdurulmuş veya süresi dolmuş.', 403);
       if (await screens.viewer(req, res, path, user, cookie)) return;
@@ -752,6 +761,18 @@ export function createPanel({
       }
 
 
+      if (path === '/api/team/members/remove' && req.method === 'POST') {
+        send(res,200,invitations.removeMember(user,await body(req))); return;
+      }
+      if (path === '/api/team/invitations' && req.method === 'GET') {
+        send(res, 200, invitations.list(user)); return;
+      }
+      if (path === '/api/team/invitations' && req.method === 'POST') {
+        send(res, 200, await invitations.send(user, await body(req))); return;
+      }
+      if (path === '/api/team/invitations/revoke' && req.method === 'POST') {
+        send(res, 200, invitations.revoke(user, await body(req))); return;
+      }
       if (path === '/api/team/roles' && req.method === 'POST') {
         if (!access(db, user, null, 'team') || !permissionRecord(db, user).manager)
           throw fail('Rol yönetimi için panel sahibi yetkisi gerekli.', 403);
@@ -801,6 +822,7 @@ export function createPanel({
         if (!access(db, user, null, 'team') || !hasPermission(db, user, 'teamManage'))
           throw fail('Müşteri yöneticisi yetkisi gerekli.', 403);
         const b = await body(req);
+        if (invitations.updateMember(user, b)) { send(res, 200, {ok:true}); return; }
         const tenant = tenantFor(db, user);
         const previous = db
           .prepare('SELECT username,role,password FROM users WHERE username=?')
@@ -830,7 +852,7 @@ export function createPanel({
         if (
           previous &&
           (previous.role === 'owner' ||
-            tenantFor(db, previous).id !== tenant.id)
+            primaryTenant(db, previous.username).id !== tenant.id)
         )
           throw fail('Bu kullanıcı adı kullanılamıyor.', 409);
         if (b.username === user.username)
@@ -838,7 +860,7 @@ export function createPanel({
             'Kendi hesabını değiştirmek için ana panel sahibini kullan.',
             403,
           );
-        if (previous && permissionRecord(db, previous).manager)
+        if (previous && permissionRecord(db, {...previous, workspaceId: tenant.id}).manager)
           throw fail('Panel sahibinin hesabı bu ekrandan değiştirilemez.', 403);
         db.exec('BEGIN');
         try {
@@ -902,6 +924,12 @@ export function createPanel({
               .all(),
           });
           return;
+        }
+        if (path === '/api/owner/licenses' && req.method === 'POST') {
+          const b = await body(req);
+          const result = grantUserLicense(db,b);
+          audit(user.username,'owner','Kullanıcı lisansı etkinleştirildi: '+b.username);
+          send(res,200,result); return;
         }
         if (path === '/api/owner/tenants' && req.method === 'POST') {
           const b = await body(req);
@@ -1066,16 +1094,7 @@ export function createPanel({
             ? db.prepare('SELECT id,name,permissions FROM team_roles WHERE tenant_id=? ORDER BY name COLLATE NOCASE').all(tenantFor(db, user).id)
                 .map((role) => ({ ...role, permissions: JSON.parse(role.permissions) }))
             : [],
-          users: access(db, user, null, 'team')
-            ? db
-                .prepare("SELECT u.username,u.role,p.permissions,p.manager FROM users u JOIN user_permissions p ON p.username=u.username WHERE u.role!='owner'")
-                .all()
-                .filter(
-                  (u) =>
-                    tenantFor(db, u).id === tenantFor(db, user).id,
-                )
-                .map((u) => ({ username: u.username, ...permissionRecord(db, u) }))
-            : [],
+          users: access(db, user, null, 'team') ? teamMembers(db, user) : [],
           audit: db
             .prepare(
               'SELECT id,time,actor,server_id AS serverId,action,status FROM audit ORDER BY time DESC',

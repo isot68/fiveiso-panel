@@ -73,6 +73,11 @@ export const PERMISSIONS = {
 };
 export const ALL_PERMISSIONS = Object.keys(PERMISSIONS);
 export function migrateTenancy(db) {
+  db.exec(`CREATE TABLE IF NOT EXISTS panel_memberships(username TEXT NOT NULL REFERENCES users(username) ON DELETE CASCADE,tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,permissions TEXT NOT NULL DEFAULT '[]',role_id TEXT,PRIMARY KEY(username,tenant_id));
+ CREATE TABLE IF NOT EXISTS selected_workspaces(username TEXT PRIMARY KEY REFERENCES users(username) ON DELETE CASCADE,tenant_id TEXT NOT NULL);
+ CREATE TABLE IF NOT EXISTS panel_invitations(id TEXT PRIMARY KEY,tenant_id TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,email TEXT NOT NULL,created_by TEXT NOT NULL,status TEXT NOT NULL,created INTEGER NOT NULL,expires INTEGER NOT NULL,accepted_by TEXT);
+ CREATE UNIQUE INDEX IF NOT EXISTS pending_panel_invitation ON panel_invitations(tenant_id,email) WHERE status IN ('sending','pending');`);
+
   db.exec(`CREATE TABLE IF NOT EXISTS tenants(id TEXT PRIMARY KEY,name TEXT NOT NULL,enabled INTEGER NOT NULL DEFAULT 1,expires TEXT,features TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS user_tenants(username TEXT PRIMARY KEY REFERENCES users(username),tenant_id TEXT NOT NULL REFERENCES tenants(id));
  CREATE TABLE IF NOT EXISTS server_tenants(server_id TEXT PRIMARY KEY REFERENCES servers(id),tenant_id TEXT NOT NULL REFERENCES tenants(id));
@@ -110,15 +115,15 @@ export function migrateTenancy(db) {
   }
   db.prepare("UPDATE users SET role='user' WHERE role!='owner'").run();
 }
+export function primaryTenant(db, username) {
+  return db.prepare('SELECT t.* FROM tenants t JOIN user_tenants u ON u.tenant_id=t.id WHERE u.username=?').get(username);
+}
 export function tenantFor(db, user) {
-  return (
-    db
-      .prepare(
-        'SELECT t.* FROM tenants t JOIN user_tenants u ON u.tenant_id=t.id WHERE u.username=?',
-      )
-      .get(user.username) ||
-    db.prepare("SELECT * FROM tenants WHERE id='local'").get()
-  );
+  const selected = user.workspaceId || db.prepare('SELECT tenant_id FROM selected_workspaces WHERE username=?').get(user.username)?.tenant_id;
+  const primary = primaryTenant(db, user.username);
+  if (selected && selected !== primary?.id && db.prepare('SELECT 1 FROM panel_memberships WHERE username=? AND tenant_id=?').get(user.username, selected))
+    return db.prepare('SELECT * FROM tenants WHERE id=?').get(selected);
+  return primary || db.prepare("SELECT * FROM tenants WHERE id='local'").get();
 }
 export function activeTenant(t) {
   return !!t?.enabled && (!t.expires || Date.parse(t.expires) > Date.now());
@@ -135,11 +140,14 @@ export function access(db, user, serverId, feature) {
       .get(serverId)?.tenant_id !== tenant.id
   )
     return false;
-  return !feature || (JSON.parse(tenant.features).includes(feature) && hasPermission(db, user, feature));
+  return feature ? (JSON.parse(tenant.features).includes(feature) && hasPermission(db, user, feature)) : JSON.parse(tenant.features).some((key) => hasPermission(db, user, key));
 }
 export function permissionRecord(db, user) {
   if (!user || user.role === 'owner') return { manager: false, permissions: [] };
-  const record = db.prepare('SELECT permissions,manager,role_id FROM user_permissions WHERE username=?').get(user.username);
+  const tenant = tenantFor(db, user);
+  const record = tenant?.id === primaryTenant(db, user.username)?.id
+    ? db.prepare('SELECT permissions,manager,role_id FROM user_permissions WHERE username=?').get(user.username)
+    : db.prepare('SELECT permissions,0 AS manager,role_id FROM panel_memberships WHERE username=? AND tenant_id=?').get(user.username, tenant?.id);
   const role = record?.role_id
     ? db.prepare('SELECT name,permissions FROM team_roles WHERE id=? AND tenant_id=?').get(record.role_id, tenantFor(db, user).id)
     : null;

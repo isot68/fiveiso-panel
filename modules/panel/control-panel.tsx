@@ -1,3 +1,4 @@
+import { AccountAccess } from './account-access';
 import { CustomerHome } from './customer-home';
 import { ResourceInstallation } from './resource-installation';
 'use client';
@@ -205,8 +206,8 @@ export function ControlPanel() {
   if (!live) {
     return <LoginPage busy={busy} onLogin={(username, password) => run(() => panel.login(username, password), 'Giriş yapıldı.')} />;
   }
-  if (data.account && data.account.status !== 'active') {
-    return <CustomerHome account={data.account} busy={busy} onLogout={() => run(panel.logout, 'Çıkış yapıldı.')} />;
+  if (data.account && (data.account.status !== 'active' || !data.account.hasAccess)) {
+    return <CustomerHome request={panel.request} onSaved={panel.refresh} account={data.account} busy={busy} onLogout={() => run(panel.logout, 'Çıkış yapıldı.')} />;
   }
   return (
     <SectionTheme.Provider value={page}><SidebarProvider
@@ -325,6 +326,7 @@ export function ControlPanel() {
           </div>
         </header>
         <div className="page-content">
+          {data.account && <AccountAccess account={data.account} request={panel.request} onSaved={panel.refresh} />}
           <div className="page-heading">
             <div>
               <h1>{title}</h1>
@@ -666,7 +668,7 @@ export function ControlPanel() {
                 <Shield className="text-primary" />
               </div>
               {canAction('teamManage') && allowed('team') && (
-                <TeamManager request={panel.request} onSaved={panel.refresh} options={data.permissionOptions || {}} users={data.users} roles={data.roles || []} manager={!!data.manager} currentUser={user.username} />
+                <TeamManager key={data.account?.workspaceId} request={panel.request} onSaved={panel.refresh} options={data.permissionOptions || {}} users={data.users} roles={data.roles || []} manager={!!data.manager} currentUser={user.username} />
               )}
               <div className="record-grid team-directory">
                 {data.users.map((u) => (

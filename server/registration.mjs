@@ -26,6 +26,11 @@ export function createRegistration(db, { deliver } = {}) {
   }
   return {
     enabled: configured,
+    async sendInvitation(message) {
+      if (!configured) throw fail('E-posta gönderimi henüz etkin değil.',503);
+      try { await sendMail(message); }
+      catch { throw fail('Davet e-postası gönderilemedi. Daha sonra tekrar dene.',503); }
+    },
     async request(req,b) {
       if (!configured) throw fail('E-posta doğrulaması henüz etkin değil. Lütfen daha sonra tekrar dene.',503);
       limit('register-ip:'+clientAddress(req),8,3600_000);

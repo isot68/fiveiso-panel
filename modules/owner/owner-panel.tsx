@@ -78,6 +78,8 @@ export function OwnerPanel() {
   const [tenantId, setTenantId] = useState('');
   const [secret, setSecret] = useState('');
   const [licenseServer, setLicenseServer] = useState('');
+  const [licenseUser,setLicenseUser] = useState('');
+  const [licenseFeatures,setLicenseFeatures] = useState<string[]>(Object.keys(labels));
   const [section, setSection] = useState('overview');
   const [serverEdit, setServerEdit] = useState<OwnerData['servers'][number] | null>(null);
   async function run(fn: () => Promise<unknown>) {
@@ -288,6 +290,7 @@ export function OwnerPanel() {
                         {data.tenants.find((t) => t.id === u.tenantId)?.name ||
                           'Ana panel sahibi'}
                       </small>
+                      <small>{(() => {const t=data.tenants.find(t=>t.id===u.tenantId);return !u.manager ? 'Davetli / ekip hesabı' : !t?.features.some(f=>!['overview','settings'].includes(f)) ? 'Lisans atanmamış' : !t.enabled ? 'Lisans durduruldu' : t.expires && Date.parse(t.expires)<=Date.now() ? 'Lisans süresi dolmuş' : 'Lisans aktif · '+(t.expires?new Date(t.expires).toLocaleDateString('tr-TR'):'Süresiz');})()}</small>
                     </div>
                       <Button
                         variant="ghost"
@@ -298,6 +301,7 @@ export function OwnerPanel() {
                       >
                         Düzenle
                       </Button>
+                      <Button variant="outline" onClick={() => {setLicenseUser(u.username);const t=data.tenants.find(t=>t.id===u.tenantId);setLicenseFeatures(t && t.features.some(f=>!['overview','settings'].includes(f))?t.features:Object.keys(labels));}}>Lisans ver</Button>
                       <Button variant="destructive" disabled={busy} onClick={() => void remove('user', u.username, u.username)}>Sil</Button>
                   </div>
                 ))}
@@ -543,6 +547,15 @@ export function OwnerPanel() {
             >
               {busy ? 'Kaydediliyor…' : 'Kaydet'}
             </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!licenseUser} onOpenChange={open=>!open&&setLicenseUser('')}>
+        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto"><DialogTitle>Kullanıcıya lisans ver</DialogTitle><DialogDescription>{licenseUser} hesabının kendi paneline modül erişimi ve lisans süresi tanımla. Bu panelin mevcut ekip üyeleri de paket kapsamından yararlanır.</DialogDescription>
+          <form className="grid gap-4" onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void run(async()=>{await panel.request('/owner/licenses',{username:licenseUser,features:licenseFeatures,expires:f.get('expires')||null});setLicenseUser('');await refresh();});}}>
+            <label className="grid gap-2">Bitiş tarihi (boş bırakırsan süresiz)<Input type="date" name="expires" defaultValue={data.tenants.find(t=>t.id===data.users.find(u=>u.username===licenseUser)?.tenantId)?.expires?.slice(0,10)||''}/></label>
+            <div className="feature-grid">{Object.entries(data.features).map(([key,label])=><label key={key} className="flex items-center gap-2"><Checkbox checked={licenseFeatures.includes(key)} onCheckedChange={checked=>setLicenseFeatures(prev=>checked?[...prev,key]:prev.filter(k=>k!==key))}/>{label}</label>)}</div>
+            <Button type="submit" disabled={busy}>Lisansı etkinleştir</Button>
           </form>
         </DialogContent>
       </Dialog>

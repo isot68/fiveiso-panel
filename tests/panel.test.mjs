@@ -1156,3 +1156,99 @@ test('account home distinguishes registration from assigned packages and keeps i
   assert.equal((await request('/logout', {}, cookie)).status, 200);
   assert.equal((await request('/account', undefined, cookie)).status, 401);
 });
+
+async function invitationFixture(t, deliver = async () => {}) {
+ const f=await fixture(t,{registration:{deliver}});
+ for(const username of ['viewer','moderator']){
+  f.db.prepare('INSERT INTO tenants(id,name,features) VALUES(?,?,?)').run(username+'-home',username,JSON.stringify(['overview','settings']));
+  f.db.prepare('UPDATE user_tenants SET tenant_id=? WHERE username=?').run(username+'-home',username);
+  f.db.prepare('UPDATE user_permissions SET manager=1 WHERE username=?').run(username);
+  f.db.prepare('INSERT INTO user_emails VALUES(?,?,?)').run(username,username+'@example.test',Date.now());
+ }
+ return {...f,admin:await f.login('admin'),viewer:await f.login('viewer'),other:await f.login('moderator'),owner:await f.login('owner')};
+}
+test('verified email invitations require recipient consent, start with zero access and isolate workspace permissions',async t=>{
+ const sent=[];const {db,request,admin,viewer,other,owner}=await invitationFixture(t,m=>sent.push(m));
+ const server=(await request('/servers',{name:'Private server',region:'TR',framework:'QBCore'},owner)).data;
+ const invite=await request('/team/invitations',{email:'  VIEWER@example.test '},admin);
+ assert.equal(invite.status,200);assert.equal(sent[0].to,'viewer@example.test');
+ assert.equal((await request('/team/invitations',{email:'viewer@example.test'},admin)).status,409);
+ assert.equal((await request('/account',undefined,other)).data.invitations.length,0);
+ assert.equal((await request('/account/invitations/respond',{id:invite.data.id,action:'accept'},other)).status,404);
+ assert.equal((await request('/account',undefined,viewer)).data.invitations.length,1);
+ assert.equal((await request('/account/invitations/respond',{id:invite.data.id,action:'accept'},viewer)).status,200);
+ assert.equal((await request('/account/invitations/respond',{id:invite.data.id,action:'accept'},viewer)).status,404);
+ let state=(await request('/state',undefined,viewer)).data;
+ assert.deepEqual(state.permissions,[]);assert.equal(state.manager,false);assert.deepEqual(state.servers,[]);assert.deepEqual(state.audit,[]);assert.deepEqual(state.users,[]);assert.equal(state.account.hasAccess,false);assert.equal(state.account.workspaceId,'local');
+ assert.equal((await request('/team/invitations',{email:'other@example.test'},viewer)).status,403);
+ assert.equal((await request('/servers/'+server.id+'/actions',{type:'kick',target:'1'},viewer)).status,403);
+ assert.equal((await request('/team/users',{username:'viewer',password:'stolen-password-123',permissions:['overview']},admin)).status,403);
+ assert.equal((await request('/team/users',{username:'viewer',permissions:['overview','players']},admin)).status,200);
+ state=(await request('/state',undefined,viewer)).data;assert.equal(state.servers.length,1);assert.equal(state.account.hasAccess,true);assert.equal(state.manager,false);
+ assert.equal((await request('/state',undefined,admin)).data.users.find(u=>u.username==='viewer').invited,true);
+ assert.equal((await request('/account/workspace',{id:'moderator-home'},viewer)).status,403);
+ assert.equal((await request('/account/workspace',{id:'viewer-home'},viewer)).status,200);
+ state=(await request('/state',undefined,viewer)).data;assert.equal(state.manager,true);assert.equal(state.servers.length,0);
+ await request('/account/workspace',{id:'local'},viewer);
+ assert.equal((await request('/team/invitations/revoke',{id:invite.data.id},other)).status,403);
+ assert.equal((await request('/team/invitations/revoke',{id:invite.data.id},admin)).status,200);
+ state=(await request('/state',undefined,viewer)).data;assert.equal(state.account.workspaceId,'viewer-home');assert.equal(state.account.workspaces.length,1);assert.deepEqual(state.servers,[]);
+ assert.equal((await request('/account/workspace',{id:'local'},viewer)).status,403);
+ const again=(await request('/team/invitations',{email:'viewer@example.test'},admin)).data;
+ await request('/account/invitations/respond',{id:again.id,action:'accept'},viewer);
+ await request('/team/invitations/revoke',{id:invite.data.id},admin);
+ assert.equal((await request('/account',undefined,viewer)).data.workspaceId,'local');
+ assert.equal((await request('/team/members/remove',{username:'viewer'},admin)).status,200);
+ assert.equal(db.prepare('SELECT username FROM users WHERE username=?').get('viewer').username,'viewer');
+});
+test('invitations handle rejection, expiry, cancellation, unverified email and email delivery failure',async t=>{
+ const {db,request,admin,viewer}=await invitationFixture(t);
+ let invite=(await request('/team/invitations',{email:'viewer@example.test'},admin)).data;
+ db.prepare('UPDATE user_emails SET verified=0 WHERE username=?').run('viewer');
+ assert.equal((await request('/account',undefined,viewer)).data.invitations.length,0);
+ assert.equal((await request('/account/invitations/respond',{id:invite.id,action:'accept'},viewer)).status,404);
+ db.prepare('UPDATE user_emails SET verified=1 WHERE username=?').run('viewer');
+ assert.equal((await request('/account/invitations/respond',{id:invite.id,action:'reject'},viewer)).status,200);
+ assert.equal((await request('/account',undefined,viewer)).data.workspaceId,'viewer-home');
+ invite=(await request('/team/invitations',{email:'viewer@example.test'},admin)).data;
+ db.prepare('UPDATE panel_invitations SET expires=0 WHERE id=?').run(invite.id);
+ assert.equal((await request('/account/invitations/respond',{id:invite.id,action:'accept'},viewer)).status,404);
+ invite=(await request('/team/invitations',{email:'viewer@example.test'},admin)).data;
+ await request('/team/invitations/revoke',{id:invite.id},admin);
+ assert.equal((await request('/account/invitations/respond',{id:invite.id,action:'accept'},viewer)).status,404);
+ const failed=await invitationFixture(t,async()=>{throw Error('SMTP down');});
+ assert.equal((await failed.request('/team/invitations',{email:'viewer@example.test'},failed.admin)).status,503);
+ assert.equal((await failed.request('/account',undefined,failed.viewer)).data.invitations.length,0);
+});
+test('owner grants user package modules and duration without granting invited workspace management',async t=>{
+ const {db,request,admin,viewer,owner}=await invitationFixture(t);
+ const invite=(await request('/team/invitations',{email:'viewer@example.test'},admin)).data;
+ await request('/account/invitations/respond',{id:invite.id,action:'accept'},viewer);
+ const grant={username:'viewer',features:['overview','players','team'],expires:'2099-01-01'};
+ assert.equal((await request('/owner/licenses',grant,admin)).status,403);
+ assert.equal((await request('/owner/licenses',{...grant,username:'owner'},owner)).status,404);
+ assert.equal((await request('/owner/licenses',{...grant,expires:'2000-01-01'},owner)).status,400);
+ assert.equal((await request('/owner/licenses',grant,owner)).status,200);
+ let state=(await request('/state',undefined,viewer)).data;
+ assert.equal(state.manager,false);assert.equal(state.account.workspaceId,'local');assert.equal(state.account.hasAccess,false);
+ await request('/account/workspace',{id:'viewer-home'},viewer);
+ state=(await request('/state',undefined,viewer)).data;
+ assert.equal(state.account.status,'active');assert.equal(state.manager,true);assert.deepEqual(state.features,['overview','players','team']);assert.equal(state.account.expires,'2099-01-01');
+ assert.equal((await request('/owner/delete',{kind:'tenant',id:'local'},owner)).status,200);
+ assert.equal((await request('/account',undefined,viewer)).data.workspaces.length,1);
+ assert.ok(db.prepare('SELECT username FROM users WHERE username=?').get('viewer'));
+});
+
+test('owner licensing an existing staff member preserves their old membership without taking over its panel',async t=>{
+ const {db,request,login}=await fixture(t);
+ const owner=await login('owner'),viewer=await login('viewer');
+ db.prepare('UPDATE user_permissions SET manager=0,permissions=? WHERE username=?').run('["overview"]','viewer');
+ const result=await request('/owner/licenses',{username:'viewer',features:['overview','players'],expires:null},owner);
+ assert.equal(result.status,200);assert.notEqual(result.data.tenantId,'local');
+ const state=(await request('/state',undefined,viewer)).data;
+ assert.equal(state.account.workspaceId,result.data.tenantId);assert.equal(state.manager,true);assert.equal(state.account.workspaces.length,2);
+ await request('/account/workspace',{id:'local'},viewer);
+ const member=(await request('/state',undefined,viewer)).data;
+ assert.equal(member.manager,false);assert.deepEqual(member.permissions,['overview']);
+ assert.equal((await request('/account/workspace',{id:'local'},owner)).status,403);
+});

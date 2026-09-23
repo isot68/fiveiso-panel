@@ -1,3 +1,4 @@
+import { AccountAccess } from './account-access';
 import { useState } from 'react';
 import {
   Activity,
@@ -28,13 +29,17 @@ export function CustomerHome({
   account,
   busy,
   onLogout,
+  request,
+  onSaved,
 }: {
+  request: (path: string, body?: unknown) => Promise<unknown>;
+  onSaved: () => Promise<void>;
   account: CustomerAccount;
   busy: boolean;
   onLogout: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const status =
+  const status = !account.hasAccess ? 'Yetki bekleniyor' :
     account.status === 'expired'
       ? 'Süresi dolmuş'
       : account.status === 'suspended'
@@ -121,6 +126,7 @@ export function CustomerHome({
           </div>
         </header>
         <main id="home" className="customer-content">
+          <AccountAccess account={account} request={request} onSaved={onSaved} />
           <div className="customer-page-title">
             <div>
               <span className="customer-eyebrow">FIVEISO / HESAP MERKEZİ</span>
@@ -139,12 +145,12 @@ export function CustomerHome({
                 Tekrar hoş geldin, <span>{account.username}</span>
               </h2>
               <p>
-                {account.status === 'unconfigured'
+                {!account.hasAccess ? 'Davetin kabul edildi. Panel sahibi yetkilerini belirlediğinde ilgili bölümlere erişebileceksin.' : account.status === 'unconfigured'
                   ? 'Hesabın hazır. Bir paket seçerek sunucunu FiveISO ile yönetmeye başla.'
                   : 'Hesabını buradan takip edebilir, panel erişimin için destek alabilirsin.'}
               </p>
-              <a className="customer-primary" href={packages}>
-                Paketleri keşfet <ArrowUpRight size={17} />
+              <a className="customer-primary" href={!account.hasAccess ? docs : packages}>
+                {!account.hasAccess ? 'Kurulum rehberini incele' : 'Paketleri keşfet'} <ArrowUpRight size={17} />
               </a>
             </div>
             <div className="customer-welcome-art" aria-hidden="true">
@@ -204,20 +210,20 @@ export function CustomerHome({
                 <Server size={29} />
               </span>
               <h3>
-                {account.serverCount
+                {!account.hasAccess ? 'Henüz bir yetkin yok' : account.serverCount
                   ? 'Sunucu erişimin şu anda kapalı'
                   : 'Henüz bir sunucun yok'}
               </h3>
               <p>
-                {account.serverCount
+                {!account.hasAccess ? 'Bu panelde henüz bir görüntüleme veya işlem yetkin yok. Panel sahibi Yetkililer bölümünden yetkilerini düzenleyebilir.' : account.serverCount
                   ? 'Paketini yenilemek veya erişim durumunu öğrenmek için destek ekibiyle iletişime geç.'
                   : 'Paketin etkinleştirildiğinde sunucuların burada görünecek. Kurulumdan canlı yönetime kadar her şey tek panelde.'}
               </p>
               <a
                 className="customer-secondary"
-                href={account.serverCount ? support : packages}
+                href={!account.hasAccess ? docs : account.serverCount ? support : packages}
               >
-                {account.serverCount ? 'Destek al' : 'Paketleri incele'}
+                {!account.hasAccess ? 'Kurulum rehberi' : account.serverCount ? 'Destek al' : 'Paketleri incele'}
                 <ArrowUpRight size={16} />
               </a>
             </div>
@@ -302,7 +308,7 @@ export function CustomerHome({
                   <span>
                     <Package size={14} />
                   </span>{' '}
-                  {account.hasPackage
+                  {!account.hasAccess ? 'Panel sahibinin yetki vermesi bekleniyor' : account.hasPackage
                     ? 'Paket erişimi bekleniyor'
                     : 'Paket seçimi bekleniyor'}
                 </li>

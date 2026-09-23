@@ -56,6 +56,10 @@ export type Ban = {
   created: string;
 };
 export type CustomerAccount = {
+  hasAccess: boolean;
+  workspaceId: string;
+  workspaces: { id: string; name: string; personal: boolean }[];
+  invitations: { id: string; workspaceName: string; invitedBy: string; expires: number }[];
   username: string; role: string; manager: boolean;
   hasPackage: boolean;
   status: 'active' | 'unconfigured' | 'expired' | 'suspended';
@@ -72,7 +76,7 @@ export type PanelState = {
   servers: Server[];
   audit: Audit[];
   bans: Ban[];
-  users: { username: string; manager: boolean; permissions: string[]; roleId?: string | null; roleName?: string | null }[];
+  users: { invited?: boolean; username: string; manager: boolean; permissions: string[]; roleId?: string | null; roleName?: string | null }[];
 };
 export type Action = {
   type: string;

@@ -1,4 +1,5 @@
-import { tenantFor, activeTenant, permissionRecord } from './tenancy.mjs';
+import { workspaceData } from './panel-invitations.mjs';
+import { tenantFor, activeTenant, permissionRecord, visibleFeatures } from './tenancy.mjs';
 
 export function accountSummary(db, user) {
   if (user.role === 'owner') return null;
@@ -21,12 +22,14 @@ export function accountSummary(db, user) {
         ? 'active'
         : 'unconfigured';
   return {
+    ...workspaceData(db, user),
+    hasAccess: visibleFeatures(db, user).length > 0,
     username: user.username,
     role: user.role,
     manager: permissionRecord(db, user).manager,
     hasPackage,
     status,
-    serverCount,
+    serverCount: visibleFeatures(db, user).length ? serverCount : 0,
     expires: tenant.expires,
     emailVerified: Boolean(
       db
