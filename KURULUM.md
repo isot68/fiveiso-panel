@@ -1,3 +1,9 @@
+> Müşteri kurulumu için güncel yöntem: panelde **Bağlantı & kurulum** bölümünden
+> sunucuya özel paketi oluşturup indir. Kimlik/token elle yazılmaz; paketteki
+> kurulum betiği başlangıç ve yetki satırlarını ekler. Ayrıntılar:
+> [Korumalı kurulum](docs/PROTECTED-INSTALLATION.md).
+> Aşağıdaki merkez/kaynak adımları geliştirme ve eski kurulumlar içindir.
+
 # FiveISO — FiveM Kontrol Merkezi
 
 > v3 güncellemesi: ayrı sahip/müşteri panelleri ve süreli modül paketleri için önce ANA-PANEL-KURULUM.md dosyasını okuyun. Güncel özellik durumu KAPSAM.md içindedir.

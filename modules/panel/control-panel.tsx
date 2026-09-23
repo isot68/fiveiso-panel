@@ -1,3 +1,4 @@
+import { ResourceInstallation } from './resource-installation';
 'use client';
 import { BrandLogo } from '@/components/brand-logo';
 import { SectionTheme } from '@/components/ui/section-theme';
@@ -28,7 +29,6 @@ import {
   Globe2,
   LayoutDashboard,
   LogOut,
-  Network,
   Plus,
   Radio,
   Search,
@@ -236,9 +236,6 @@ export function ControlPanel() {
           <div className="brand">
             <BrandLogo />
           </div>
-          <p className="text-xs tracking-[.18em] text-muted-foreground mt-1">
-            SERVER OPERATIONS
-          </p>
         </SidebarHeader>
         <SidebarContent className="px-4">
           <div className="workspace-label">
@@ -717,31 +714,9 @@ export function ControlPanel() {
                 )}
               </section>
               <section className="surface p-6">
-                <Network className="text-primary mb-5" size={30} />
-                <h2>Ana makine üzerinden kontrol</h2>
-                <p className="text-muted-foreground mt-3 leading-relaxed">
-                  Merkez servisi kendi bilgisayarında çalışır. FiveM ajanı her
-                  sunucudan merkeze bağlantı kurar; sunucuların aynı makinede
-                  olması gerekmez.
-                </p>
-                <ol className="setup-list">
-                  <li>
-                    Projedeki KURULUM.md dosyasını takip ederek merkez servisini
-                    başlat.
-                  </li>
-                  <li>Yönetici hesabınla yerel panele giriş yap.</li>
-                  <li>Sunucu ekle ve o sunucu için üretilen anahtarı al.</li>
-                  <li>
-                    fiveiso kaynağını FiveM sunucusuna kopyala; merkez
-                    adresini, sunucu kimliğini ve anahtarı tanımla.
-                  </li>
-                  <li>
-                    Ajan başladığında oyuncular ve kaynaklar otomatik görünür.
-                  </li>
-                </ol>
-                <Button onClick={() => setModal('login')}>
-                  Merkeze giriş yap <ArrowUpRight size={16} />
-                </Button>
+                {live && user.manager && server
+                  ? <ResourceInstallation key={server.id} serverId={server.id} />
+                  : <p className="text-muted-foreground">Kurulum paketini müşteri panel sahibi oluşturabilir. Sunucun henüz görünmüyorsa FiveISO yöneticisinden sunucu ataması iste.</p>}
               </section>
               <section className="surface p-6">
                 <h2>Bağlantı bilgileri</h2>
@@ -753,7 +728,7 @@ export function ControlPanel() {
                   <dt>Bağlantı yönü</dt>
                   <dd>Sunucu → ana makine</dd>
                   <dt>Kimlik doğrulama</dt>
-                  <dd>Oturum + sunucu anahtarı</dd>
+                  <dd>Oturum + sunucuya bağlı lisans</dd>
                   <dt>Veri saklama</dt>
                   <dd>Ana makinede SQLite</dd>
                 </dl>
@@ -794,14 +769,7 @@ export function ControlPanel() {
             </DialogDescription>
           </DialogHeader>
           {credentials ? (
-            <div>
-              <p className="text-sm text-primary mb-3">
-                {live
-                  ? 'Anahtar yalnızca şimdi gösterilir. Güvenli bir yere kaydet.'
-                  : 'Demo anahtarıdır; gerçek bağlantı kurulmaz.'}
-              </p>
-              <pre className="break-all whitespace-pre-wrap bg-background p-4 rounded-lg text-xs">{`set fiveiso_server_id "${credentials.id}"\nset fiveiso_token "${credentials.token}"\nset fiveiso_url "https://panel.fiveiso.com"\nadd_ace resource.fiveiso command allow\nensure fiveiso`}</pre>
-            </div>
+            live ? <ResourceInstallation serverId={credentials.id} /> : <p>Demo modunda kurulum paketi oluşturulmaz.</p>
           ) : (
             <form
               className="grid gap-4"

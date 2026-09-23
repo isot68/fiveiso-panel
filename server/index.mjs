@@ -1,3 +1,6 @@
+import { createRegistration } from './registration.mjs';
+import { deleteOwnerRecord, updateOwnerServer } from './owner-management.mjs';
+import { migrateLicenses, authorizeAgent, activateLicense, licenseManager, licenseStatus, revokeLicense, createResourcePackage, downloadResourcePackage } from './licensing.mjs';
 import { DB_ACTIONS } from './database-actions.mjs';
 import { createScreenStreams } from './screen-streams.mjs';
 import { createAgentStream } from './agent-stream.mjs';
@@ -44,8 +47,13 @@ export function createPanel({
   origin = process.env.PANEL_ORIGIN || 'http://localhost:3030',
   staticRoot = resolve('dist/client'),
   discord = {},
+  registration = {},
+  resourceTemplate = resolve('dist/resource-template.json'),
+  resourceOrigin = process.env.FIVEISO_RESOURCE_ORIGIN || origin,
 } = {}) {
   migrateTenancy(db);
+  migrateLicenses(db);
+  const registrations = createRegistration(db, registration);
   const discordClientId = discord.clientId ?? process.env.DISCORD_CLIENT_ID;
   const discordClientSecret = discord.clientSecret ?? process.env.DISCORD_CLIENT_SECRET;
   const discordRedirectUri = discord.redirectUri ?? process.env.DISCORD_REDIRECT_URI ?? `${origin}/api/auth/discord/callback`;
@@ -284,6 +292,7 @@ export function createPanel({
       }
       if (
         req.method === 'POST' &&
+        path !== '/api/license/activate' &&
         path !== '/api/agent/heartbeat' &&
         path !== '/api/host/heartbeat' &&
         path !== '/api/agent/screens' &&
@@ -291,6 +300,13 @@ export function createPanel({
         !allowedOrigins.has(req.headers.origin)
       )
         throw fail('Kaynak adresi doğrulanamadı.', 403);
+      if (path === '/api/license/activate' && req.method === 'POST') {
+        const b = await body(req);
+        send(res, 200, activateLicense(db, req, b.packageId));
+        return;
+      }
+      if (path.startsWith('/api/agent/')) authorizeAgent(db, req);
+      if (path === '/api/host/heartbeat') authorizeAgent(db, req, { host: true });
       if (path === '/api/host/heartbeat' && req.method === 'POST') {
         const id = req.headers['x-fiveiso-server'];
         const bearer = req.headers.authorization?.replace(/^Bearer /, '') || '';
@@ -326,6 +342,17 @@ export function createPanel({
           commands: queue.map(({ id: commandId, type }) => ({ id: commandId, type })),
         });
         return;
+      }
+      if (path === '/api/registration/config' && req.method === 'GET') {
+        send(res, 200, { enabled: registrations.enabled }); return;
+      }
+      if (path === '/api/registration/request' && req.method === 'POST') {
+        send(res, 200, await registrations.request(req, await body(req))); return;
+      }
+      if (path === '/api/registration/verify' && req.method === 'POST') {
+        const result = registrations.verify(req, await body(req));
+        audit(result.username, 'registration', 'E-posta doğrulanarak hesap oluşturuldu');
+        send(res, 201, result); return;
       }
       if (path === '/api/login' && req.method === 'POST') {
         const forwardedIp = req.headers['x-real-ip'];
@@ -672,6 +699,31 @@ export function createPanel({
         res.end(req.method === 'HEAD' ? undefined : content);
         return;
       }
+      const licenseMatch = path.match(/^\/api\/servers\/([^/]+)\/(license|package)$/);
+      if (licenseMatch) {
+        const id = decodeURIComponent(licenseMatch[1]);
+        licenseManager(db, user, id);
+        if (licenseMatch[2] === 'package' && req.method === 'GET') {
+          const archive = downloadResourcePackage(db, id);
+          res.writeHead(200, { 'Content-Type': 'application/zip', 'Content-Disposition': 'attachment; filename="fiveiso-install.zip"', 'Cache-Control': 'private, no-store' });
+          res.end(archive);
+          return;
+        }
+        if (licenseMatch[2] === 'license' && req.method === 'GET') {
+          send(res, 200, licenseStatus(db, id));
+          return;
+        }
+        if (licenseMatch[2] === 'license' && req.method === 'POST') {
+          const b = await body(req);
+          if (b.action === 'create') await createResourcePackage(db, id, new URL(resourceOrigin).origin, resourceTemplate);
+          else if (b.action === 'revoke') revokeLicense(db, id);
+          else throw fail('Lisans işlemi geçersiz.');
+          audit(user.username, id, b.action === 'create' ? 'Korumalı kurulum paketi oluşturuldu' : 'Lisans silindi; eski paket geçersiz');
+          send(res, 200, licenseStatus(db, id));
+          return;
+        }
+        throw fail('Yöntem desteklenmiyor.', 405);
+      }
       if (path === '/api/me' && req.method === 'GET') {
         send(res, 200, {
           ...user,
@@ -811,6 +863,20 @@ export function createPanel({
       if (path.startsWith('/api/owner')) {
         if (user.role !== 'owner')
           throw fail('Yalnızca ana panel sahibi erişebilir.', 403);
+        if (path === '/api/owner/delete' && req.method === 'POST') {
+          const b = await body(req);
+          if (!['tenant', 'user', 'server'].includes(b.kind) || typeof b.id !== 'string') throw fail('Silme isteği geçersiz.');
+          const removed = deleteOwnerRecord(db, b.kind, b.id);
+          for (const [key, entry] of sessions) if (removed.users.includes(entry.username)) sessions.delete(key);
+          for (const id of removed.servers) { hostStates.delete(id); hostCommands.delete(id); mapBlipsByServer.delete(id); agentStream.disconnect(id); }
+          audit(user.username, 'owner', `${b.kind} silindi: ${b.id}`);
+          send(res, 200, { ok: true }); return;
+        }
+        if (path === '/api/owner/servers' && req.method === 'POST') {
+          const b = await body(req); updateOwnerServer(db, b);
+          audit(user.username, b.id, 'Sunucu bilgileri düzenlendi');
+          send(res, 200, { ok: true }); return;
+        }
         if (path === '/api/owner' && req.method === 'GET') {
           send(res, 200, {
             features: FEATURES,
@@ -820,12 +886,12 @@ export function createPanel({
               .map((t) => ({ ...t, features: JSON.parse(t.features) })),
             users: db
               .prepare(
-                "SELECT u.username,u.role,ut.tenant_id AS tenantId FROM users u LEFT JOIN user_tenants ut ON ut.username=u.username WHERE u.role!='owner'",
+                "SELECT u.username,u.role,ue.email,up.manager,ut.tenant_id AS tenantId FROM users u LEFT JOIN user_emails ue ON ue.username=u.username LEFT JOIN user_permissions up ON up.username=u.username LEFT JOIN user_tenants ut ON ut.username=u.username WHERE u.role!='owner'",
               )
               .all(),
             servers: db
               .prepare(
-                'SELECT s.id,s.name,st.tenant_id AS tenantId FROM servers s LEFT JOIN server_tenants st ON st.server_id=s.id',
+                'SELECT s.id,s.name,s.region,s.framework,st.tenant_id AS tenantId FROM servers s LEFT JOIN server_tenants st ON st.server_id=s.id',
               )
               .all(),
           });
@@ -1035,6 +1101,7 @@ export function createPanel({
             b[field].length > 80
           )
             throw fail('Sunucu bilgilerini kontrol et.');
+        if (!db.prepare('SELECT id FROM tenants LIMIT 1').get()) throw fail('Önce bir müşteri oluştur.');
         const id = randomUUID();
         const secret = token();
         db.prepare(
@@ -1046,7 +1113,8 @@ export function createPanel({
           b.framework.trim(),
           hashToken(secret),
         );
-        db.prepare('INSERT INTO server_tenants VALUES(?,?)').run(id, 'local');
+        const defaultTenant = db.prepare("SELECT id FROM tenants ORDER BY (id='local') DESC LIMIT 1").get();
+        db.prepare('INSERT INTO server_tenants VALUES(?,?)').run(id, defaultTenant.id);
         audit(user.username, id, 'Sunucu eklendi');
         send(res, 201, { id, token: secret });
         return;

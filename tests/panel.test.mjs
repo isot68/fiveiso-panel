@@ -224,7 +224,7 @@ test('canlı ekran: lisanslı viewer kendi sunucusunu izler; lisans iptali yayı
   assert.equal((await request(base,payload,viewer)).status,200);
   assert.equal((await agent()).data.streams.length,1);
   db.prepare("UPDATE tenants SET enabled=0 WHERE id='local'").run();
-  assert.equal((await agent()).data.streams.length,0);
+  assert.equal((await agent()).status,403);
   assert.equal((await request(base,payload,viewer)).status,403);
   db.prepare("UPDATE tenants SET enabled=1,expires=? WHERE id='local'").run('2000-01-01T00:00:00Z');
   assert.equal((await request(base,payload,viewer)).status,403);
@@ -1071,4 +1071,60 @@ test('SQL komutları: doğrulama, sonuç gizliliği, modül iptali ve ajan izola
       .status,
     'cancelled',
   );
+});
+
+test('email signup creates nothing before verification; codes expire, are single-use and never grant paid server access',async t=>{
+ const sent=[];
+ const {db,request,login}=await fixture(t,{registration:{deliver:async message=>sent.push(message)}});
+ assert.equal((await request('/registration/config')).data.enabled,true);
+ const start=await request('/registration/request',{username:'newcustomer',email:'new@example.test',password:'test-password-123'});
+ assert.equal(start.status,200);assert.equal(sent.length,1);
+ assert.equal(db.prepare('SELECT username FROM users WHERE username=?').get('newcustomer'),undefined);
+ assert(!JSON.stringify(start.data).includes('test-password'));
+ assert.deepEqual(Object.keys(start.data).sort(),['expiresIn','id']);
+ const code=sent[0].text.match(/\b\d{6}\b/)[0];
+ assert.notEqual(db.prepare('SELECT code_hash FROM registration_pending WHERE id=?').get(start.data.id).code_hash,code);
+ assert.equal((await request('/registration/verify',{id:start.data.id,code:code==='000000'?'111111':'000000'})).status,400);
+ assert.equal((await request('/registration/verify',{id:start.data.id,code})).status,201);
+ assert.equal((await request('/registration/verify',{id:start.data.id,code})).status,410);
+ const cookie=await login('newcustomer');
+ const me=await request('/me',undefined,cookie);
+ assert.equal(me.status,200);assert.equal(me.data.role,'user');assert.equal(me.data.manager,true);
+ assert.deepEqual(me.data.features,['overview','settings']);
+ assert.equal((await request('/state',undefined,cookie)).data.servers.length,0);
+ assert.equal((await request('/owner',undefined,cookie)).status,403);
+ assert.equal((await request('/servers',{name:'x',region:'TR',framework:'QBCore'},cookie)).status,403);
+ assert.equal((await request('/registration/request',{username:'NEWCUSTOMER',email:'other@example.test',password:'test-password-123'})).status,409);
+ const expired=await request('/registration/request',{username:'expired',email:'expired@example.test',password:'test-password-123'});
+ db.prepare('UPDATE registration_pending SET expires=0 WHERE id=?').run(expired.data.id);
+ assert.equal((await request('/registration/verify',{id:expired.data.id,code:sent.at(-1).text.match(/\b\d{6}\b/)[0]})).status,410);
+ const limited=await request('/registration/request',{username:'limited',email:'limited@example.test',password:'test-password-123'});
+ const real=sent.at(-1).text.match(/\b\d{6}\b/)[0],wrong=real==='000000'?'111111':'000000';
+ for(let i=0;i<5;i++)assert.equal((await request('/registration/verify',{id:limited.data.id,code:wrong})).status,400);
+ assert.equal((await request('/registration/verify',{id:limited.data.id,code:real})).status,410);
+});
+test('registration delivery failures leave no account or usable pending code',async t=>{
+ const {db,request}=await fixture(t,{registration:{deliver:async()=>{throw Error('private smtp detail');}}});
+ const result=await request('/registration/request',{username:'failedmail',email:'failed@example.test',password:'test-password-123'});
+ assert.equal(result.status,503);assert(!JSON.stringify(result.data).includes('private smtp'));
+ assert.equal(db.prepare('SELECT COUNT(*) AS n FROM registration_pending').get().n,0);
+ assert.equal(db.prepare('SELECT username FROM users WHERE username=?').get('failedmail'),undefined);
+});
+test('owner can edit/delete servers and users; deleting a tenant removes its records and invalidates sessions',async t=>{
+ const {db,request,login}=await fixture(t);
+ const owner=await login('owner'),viewer=await login('viewer');
+ const srv=(await request('/servers',{name:'Old name',region:'TR',framework:'QBCore'},owner)).data;
+ assert.equal((await request('/owner/servers',{id:srv.id,name:'New name',region:'EU',framework:'Qbox'},owner)).status,200);
+ assert.equal(db.prepare('SELECT name FROM servers WHERE id=?').get(srv.id).name,'New name');
+ assert.equal((await request('/owner/delete',{kind:'server',id:srv.id},viewer)).status,403);
+ assert.equal((await request('/owner/delete',{kind:'user',id:'owner'},owner)).status,403);
+ assert.equal((await request('/owner/delete',{kind:'user',id:'viewer'},owner)).status,200);
+ assert.equal((await request('/me',undefined,viewer)).status,401);
+ assert.equal((await request('/owner/delete',{kind:'tenant',id:'local'},owner)).status,200);
+ assert.equal(db.prepare('SELECT COUNT(*) AS n FROM servers').get().n,0);
+ assert.equal(db.prepare('SELECT COUNT(*) AS n FROM user_tenants').get().n,0);
+ assert.equal(db.prepare("SELECT username FROM users WHERE role='owner'").get().username,'owner');
+ // A restart must not silently resurrect the deleted default customer.
+ const {migrateTenancy}=await import('../server/tenancy.mjs');migrateTenancy(db);
+ assert.equal(db.prepare('SELECT COUNT(*) AS n FROM tenants').get().n,0);
 });

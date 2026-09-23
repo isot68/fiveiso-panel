@@ -1,5 +1,5 @@
+import { authorizeAgent } from './licensing.mjs';
 import { WebSocket, WebSocketServer } from 'ws';
-import { sameToken } from './security.mjs';
 
 export function createAgentStream(server, db) {
   const sockets = new Map();
@@ -10,17 +10,14 @@ export function createAgentStream(server, db) {
     try { path = new URL(req.url, 'http://localhost').pathname; } catch { socket.destroy(); return; }
     if (path !== '/api/agent/stream') { socket.destroy(); return; }
     const id = req.headers['x-fiveiso-server'];
-    const bearer = req.headers.authorization?.replace(/^Bearer /, '') || '';
-    const agent = typeof id === 'string'
-      ? db.prepare('SELECT token_hash FROM servers WHERE id=?').get(id)
-      : null;
-    if (!agent || !sameToken(bearer, agent.token_hash)) {
+    try { authorizeAgent(db, req); } catch {
       socket.end('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n');
       return;
     }
     upgrades.handleUpgrade(req, socket, head, (ws) => {
       sockets.get(id)?.terminate();
       sockets.set(id, ws);
+      ws.agentRequest = req;
       ws.isAlive = true;
       ws.on('pong', () => { ws.isAlive = true; });
       ws.on('close', () => { if (sockets.get(id) === ws) sockets.delete(id); });
@@ -31,6 +28,7 @@ export function createAgentStream(server, db) {
 
   const ping = setInterval(() => {
     for (const ws of sockets.values()) {
+      try { authorizeAgent(db, ws.agentRequest); } catch { ws.terminate(); continue; }
       if (!ws.isAlive) { ws.terminate(); continue; }
       ws.isAlive = false;
       ws.ping();
@@ -39,10 +37,11 @@ export function createAgentStream(server, db) {
   ping.unref();
 
   return {
+    disconnect(id) { sockets.get(id)?.terminate(); sockets.delete(id); },
     wake(id) {
       const ws = sockets.get(id);
       if (ws?.readyState === WebSocket.OPEN) {
-        try { ws.send('wake'); } catch { ws.terminate(); }
+        try { authorizeAgent(db, ws.agentRequest); ws.send('wake'); } catch { ws.terminate(); }
       }
     },
     dispose() {

@@ -82,9 +82,13 @@ export function migrateTenancy(db) {
  CREATE TABLE IF NOT EXISTS discord_invites(token_hash TEXT PRIMARY KEY,tenant_id TEXT NOT NULL REFERENCES tenants(id),role_id TEXT NOT NULL REFERENCES team_roles(id),expires INTEGER NOT NULL,created_by TEXT NOT NULL);`);
   if (!db.prepare('PRAGMA table_info(user_permissions)').all().some((column) => column.name === 'role_id'))
     db.exec('ALTER TABLE user_permissions ADD COLUMN role_id TEXT');
-  db.prepare(
-    'INSERT OR IGNORE INTO tenants(id,name,features) VALUES(?,?,?)',
-  ).run('local', 'Mevcut çalışma alanı', JSON.stringify(Object.keys(FEATURES)));
+  db.exec('CREATE TABLE IF NOT EXISTS app_migrations(name TEXT PRIMARY KEY)');
+  const orphans = db.prepare("SELECT username FROM users WHERE role!='owner' AND username NOT IN (SELECT username FROM user_tenants) LIMIT 1").get()
+    || db.prepare('SELECT id FROM servers WHERE id NOT IN (SELECT server_id FROM server_tenants) LIMIT 1').get();
+  if (!db.prepare("SELECT name FROM app_migrations WHERE name='default-tenant'").get() || orphans) {
+    db.prepare('INSERT OR IGNORE INTO tenants(id,name,features) VALUES(?,?,?)').run('local', 'Mevcut çalışma alanı', JSON.stringify(Object.keys(FEATURES)));
+    db.prepare("INSERT OR IGNORE INTO app_migrations VALUES('default-tenant')").run();
+  }
   db.exec(
     "INSERT OR IGNORE INTO user_tenants SELECT username,'local' FROM users WHERE role != 'owner'; INSERT OR IGNORE INTO server_tenants SELECT id,'local' FROM servers;",
   );

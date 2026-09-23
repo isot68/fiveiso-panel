@@ -1,4 +1,5 @@
 'use client';
+import { ResourceInstallation } from '../panel/resource-installation';
 import { BrandLogo } from '@/components/brand-logo';
 import { useEffect, useState } from 'react';
 import { useScrollMemory } from '../panel/use-scroll-memory';
@@ -39,8 +40,8 @@ type Tenant = {
 type OwnerData = {
   features: Record<string, string>;
   tenants: Tenant[];
-  users: { username: string; role: string; tenantId: string }[];
-  servers: { id: string; name: string; tenantId: string }[];
+  users: { username: string; role: string; tenantId: string; email?: string; manager?: number }[];
+  servers: { id: string; name: string; region: string; framework: string; tenantId: string }[];
 };
 const labels = {
   overview: 'Kontrol merkezi',
@@ -76,6 +77,9 @@ export function OwnerPanel() {
   const [enabled, setEnabled] = useState(true);
   const [tenantId, setTenantId] = useState('');
   const [secret, setSecret] = useState('');
+  const [licenseServer, setLicenseServer] = useState('');
+  const [section, setSection] = useState('overview');
+  const [serverEdit, setServerEdit] = useState<OwnerData['servers'][number] | null>(null);
   async function run(fn: () => Promise<unknown>) {
     setBusy(true);
     setMessage('');
@@ -101,58 +105,13 @@ export function OwnerPanel() {
     setEnabled(t ? !!t.enabled : true);
     setModal('tenant');
   }
-  return (
-    <main className="owner-shell">
-      <aside className="owner-sidebar">
-        <a href="/owner" className="brand"><BrandLogo /></a>
-        <p className="owner-sidebar-caption">SERVER OPERATIONS</p>
-        <nav className="owner-nav" aria-label="Sahip paneli">
-          <span>YÖNETİM</span>
-          <a href="#owner-overview"><Crown size={17} /> Genel bakış</a>
-          {panel.live && panel.user.role === 'owner' && <>
-            <a href="#owner-tenants"><ShieldCheck size={17} /> Müşteriler</a>
-            <a href="#owner-users"><Users size={17} /> Kullanıcılar</a>
-            <a href="#owner-servers"><Server size={17} /> Sunucular</a>
-          </>}
-        </nav>
-        <div className="owner-sidebar-account"><span>NX</span><div><strong>{panel.user.username || 'Sahip paneli'}</strong><small>Yönetim alanı</small></div></div>
-      </aside>
-      <div className="owner-main">
-      <header className="owner-header">
-        <div className="owner-breadcrumb">Çalışma alanı <span>›</span> Sahip paneli</div>
-        <div className="flex items-center gap-4">
-          {panel.live && (
-            <><Button variant="outline" onClick={() => window.location.assign('/api/auth/discord/start?mode=link')}>Discord hesabını bağla</Button><Button variant="outline" onClick={() => run(panel.logout)}>
-              <LogOut size={15} />
-              Çıkış
-            </Button></>
-          )}
-        </div>
-      </header>
-      <div className="owner-content" id="owner-overview">
-        <div className="page-heading">
-          <div>
-            <div className="eyebrow">ANA YÖNETİM / SAHİP PANELİ</div>
-            <h1>Kontrol sende.</h1>
-            <p className="text-muted-foreground mt-3">
-              Müşteriler, erişim süreleri, sunucular ve modül paketleri.
-            </p>
-          </div>
-          {panel.live && panel.user.role === 'owner' && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setModal('user')}>
-                <Users size={16} />
-                Kullanıcı oluştur
-              </Button>
-              <Button onClick={() => edit(null)}>
-                <Plus size={16} />
-                Müşteri oluştur
-              </Button>
-            </div>
-          )}
-        </div>
-        {!panel.live ? (
-          <section className="glass-panel owner-login">
+  async function remove(kind: 'tenant' | 'user' | 'server', id: string, name: string) {
+    const detail = kind === 'tenant' ? 'Bu müşterinin kullanıcıları, sunucuları ve lisansları da silinecek.' : kind === 'server' ? 'Sunucunun lisansı ve bağlantısı da iptal edilecek.' : 'Kullanıcının oturumları da kapatılacak.';
+    if (!window.confirm(`${name} silinsin mi? ${detail} Bu işlem geri alınamaz.`)) return;
+    await run(async () => { await panel.request('/owner/delete', { kind, id }); await refresh(); });
+  }
+  if (panel.loading) return <main className="owner-auth-shell"><p>Yükleniyor…</p></main>;
+  if (!panel.live) return <main className="owner-auth-shell"><section className="glass-panel owner-login">
             <Crown size={30} className="text-primary" />
             <h2>Ana panel girişi</h2>
             <p className="text-muted-foreground text-sm">
@@ -196,17 +155,61 @@ export function OwnerPanel() {
             <p className="text-xs text-muted-foreground">
               İlk sahip hesabını kurulum rehberindeki owner rolüyle oluştur.
             </p>
-          </section>
-        ) : panel.user.role !== 'owner' ? (
-          <section className="glass-panel p-8">
-            <h2>Bu hesap ana panele erişemez.</h2>
-            <a className="text-primary block mt-4" href="/panel">
-              Kendi sunucu paneline git →
-            </a>
-          </section>
-        ) : (
+          </section></main>;
+  if (panel.user.role !== 'owner') return <main className="owner-auth-shell"><section className="glass-panel owner-login"><h2>Bu hesap ana panele erişemez.</h2><a href="/panel">Kendi sunucu paneline git →</a></section></main>;
+  return (
+    <main className="owner-shell">
+      <aside className="owner-sidebar">
+        <a href="/owner" className="brand"><BrandLogo /></a>
+
+        <nav className="owner-nav" aria-label="Sahip paneli">
+          <span>YÖNETİM</span>
+          <a href="#owner-overview" data-active={section === 'overview'} onClick={() => setSection('overview')}><Crown size={17} /> Genel bakış</a>
+          {panel.live && panel.user.role === 'owner' && <>
+            <a href="#owner-tenants" data-active={section === 'tenants'} onClick={() => setSection('tenants')}><ShieldCheck size={17} /> Müşteriler</a>
+            <a href="#owner-users" data-active={section === 'users'} onClick={() => setSection('users')}><Users size={17} /> Kullanıcılar</a>
+            <a href="#owner-servers" data-active={section === 'servers'} onClick={() => setSection('servers')}><Server size={17} /> Sunucular</a>
+          </>}
+        </nav>
+        <div className="owner-sidebar-account"><span>NX</span><div><strong>{panel.user.username || 'Sahip paneli'}</strong><small>Yönetim alanı</small></div></div>
+      </aside>
+      <div className="owner-main">
+      <header className="owner-header">
+        <div className="owner-breadcrumb">Çalışma alanı <span>›</span> Sahip paneli</div>
+        <div className="flex items-center gap-4">
+          {panel.live && (
+            <><Button variant="outline" onClick={() => window.location.assign('/api/auth/discord/start?mode=link')}>Discord hesabını bağla</Button><Button variant="outline" onClick={() => run(panel.logout)}>
+              <LogOut size={15} />
+              Çıkış
+            </Button></>
+          )}
+        </div>
+      </header>
+      <div className="owner-content" id="owner-overview">
+        <nav className="owner-section-tabs" aria-label="Yönetim bölümleri">{Object.entries({overview:'Genel bakış',tenants:'Müşteriler',users:'Kullanıcılar',servers:'Sunucular'}).map(([id,label]) => <Button key={id} variant={section === id ? 'default' : 'outline'} onClick={() => setSection(id)}>{label}</Button>)}</nav>
+        <div className="page-heading">
+          <div>
+            <div className="eyebrow">ANA YÖNETİM / SAHİP PANELİ</div>
+            <h1>{{overview:'Kontrol sende.', tenants:'Müşteriler ve paketler', users:'Kullanıcı hesapları', servers:'Sunucu yönetimi'}[section]}</h1>
+            <p className="text-muted-foreground mt-3">
+              Müşteriler, erişim süreleri, sunucular ve modül paketleri.
+            </p>
+          </div>
+          {panel.live && panel.user.role === 'owner' && (
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setModal('user')}>
+                <Users size={16} />
+                Kullanıcı oluştur
+              </Button>
+              <Button onClick={() => edit(null)}>
+                <Plus size={16} />
+                Müşteri oluştur
+              </Button>
+            </div>
+          )}
+        </div>
           <>
-            <div className="owner-stats">
+            <div className="owner-stats" hidden={section !== 'overview'}>
               {[
                 {
                   label: 'Müşteri çalışma alanı',
@@ -233,7 +236,7 @@ export function OwnerPanel() {
                 </div>
               ))}
             </div>
-            <section className="glass-panel mt-6" id="owner-tenants">
+            <section className="glass-panel mt-6" id="owner-tenants" hidden={!['overview','tenants'].includes(section)}>
               <div className="section-heading">
                 <h2>Müşteriler ve paketler</h2>
                 <span className="text-sm text-muted-foreground">
@@ -264,13 +267,14 @@ export function OwnerPanel() {
                         : 'Aktif'}
                   </span>
                   <Button variant="outline" onClick={() => edit(t)}>
-                    Paket ve erişim
+                    Düzenle
                   </Button>
+                  <Button variant="destructive" disabled={busy} onClick={() => void remove('tenant', t.id, t.name)}>Sil</Button>
                 </div>
               ))}
             </section>
-            <div className="owner-columns mt-6">
-              <section className="glass-panel" id="owner-users">
+            <div className="owner-columns mt-6" style={section !== 'overview' ? {gridTemplateColumns:'1fr'} : undefined}>
+              <section className="glass-panel" id="owner-users" hidden={!['overview','users'].includes(section)}>
                 <div className="section-heading">
                   <h2>Kullanıcı hesapları</h2>
                 </div>
@@ -280,7 +284,7 @@ export function OwnerPanel() {
                     <div className="flex-1">
                       {u.username}
                       <small>
-                        Müşteri yöneticisi ·{' '}
+                        {u.manager ? 'Müşteri yöneticisi' : 'Ekip üyesi'} ·{' '}
                         {data.tenants.find((t) => t.id === u.tenantId)?.name ||
                           'Ana panel sahibi'}
                       </small>
@@ -294,10 +298,11 @@ export function OwnerPanel() {
                       >
                         Düzenle
                       </Button>
+                      <Button variant="destructive" disabled={busy} onClick={() => void remove('user', u.username, u.username)}>Sil</Button>
                   </div>
                 ))}
               </section>
-              <section className="glass-panel" id="owner-servers">
+              <section className="glass-panel" id="owner-servers" hidden={!['overview','servers'].includes(section)}>
                 <div className="section-heading">
                   <h2>Sunucu atamaları</h2>
                   <Button
@@ -318,6 +323,9 @@ export function OwnerPanel() {
                         {data.tenants.find((t) => t.id === s.tenantId)?.name}
                       </small>
                     </div>
+                    <Button variant="outline" onClick={() => setServerEdit(s)}>Düzenle</Button>
+                    <Button variant="destructive" disabled={busy} onClick={() => void remove('server', s.id, s.name)}>Sil</Button>
+                    <Button variant="outline" onClick={() => setLicenseServer(s.id)}>Kurulum / lisans</Button>
                     <Select
                       value={s.tenantId}
                       onValueChange={(v) => {
@@ -350,7 +358,6 @@ export function OwnerPanel() {
               </section>
             </div>
           </>
-        )}
       </div>
       </div>
       <Dialog open={!!modal} onOpenChange={(o) => !o && setModal('')}>
@@ -389,9 +396,10 @@ export function OwnerPanel() {
                     String(f.get('region')),
                     String(f.get('framework')),
                   );
-                  setSecret(
-                    `set fiveiso_server_id "${s.id}"\nset fiveiso_token "${s.token}"`,
-                  );
+                  await panel.request('/owner/assign-server', { serverId: s.id, tenantId: String(f.get('serverTenantId')) });
+                  setSecret('');
+                  setModal('');
+                  setLicenseServer(s.id);
                   await refresh();
                   return;
                 } else {
@@ -448,6 +456,12 @@ export function OwnerPanel() {
               </>
             ) : modal === 'server' ? (
               <>
+                <label>Müşteri
+                  <select name="serverTenantId" required defaultValue="" className="w-full rounded-md border bg-background p-2">
+                    <option value="" disabled>Müşteri seç</option>
+                    {data.tenants.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </label>
                 <Input
                   name="name"
                   aria-label="Sunucu adı"
@@ -530,6 +544,23 @@ export function OwnerPanel() {
               {busy ? 'Kaydediliyor…' : 'Kaydet'}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!licenseServer} onOpenChange={open => !open && setLicenseServer('')}>
+        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+          <DialogTitle>FiveISO kurulumu ve lisansı</DialogTitle>
+          <DialogDescription>Sunucuya özel paketi oluştur, indir veya taşımak için lisansı sil.</DialogDescription>
+          {licenseServer && <ResourceInstallation key={licenseServer} serverId={licenseServer} />}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!serverEdit} onOpenChange={open => !open && setServerEdit(null)}>
+        <DialogContent><DialogTitle>Sunucuyu düzenle</DialogTitle><DialogDescription>Sunucu adı, konumu ve framework bilgisini güncelle.</DialogDescription>
+          {serverEdit && <form className="grid gap-4" onSubmit={e => {e.preventDefault();const f=new FormData(e.currentTarget);void run(async()=>{await panel.request('/owner/servers',{id:serverEdit.id,name:f.get('name'),region:f.get('region'),framework:f.get('framework')});setServerEdit(null);await refresh();});}}>
+            <label>Sunucu adı<Input name="name" defaultValue={serverEdit.name} required maxLength={80}/></label>
+            <label>Konum<Input name="region" defaultValue={serverEdit.region} required maxLength={80}/></label>
+            <label>Framework<Input name="framework" defaultValue={serverEdit.framework} required maxLength={80}/></label>
+            <Button type="submit" disabled={busy}>Kaydet</Button>
+          </form>}
         </DialogContent>
       </Dialog>
     </main>

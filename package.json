@@ -14,7 +14,10 @@
     "center": "node --env-file-if-exists=.env server/index.mjs",
     "host": "node --env-file-if-exists=fiveiso-host/.env fiveiso-host/index.mjs",
     "test": "node --test tests/*.test.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:resource": "node scripts/build-resource.mjs",
+    "build:server": "node scripts/build-server.mjs",
+    "build:release": "npm run build && npm run build:resource && npm run build:server"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",
@@ -24,8 +27,11 @@
     "cmdk": "1.1.1",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.2",
+    "fflate": "^0.8.3",
     "input-otp": "1.4.2",
+    "javascript-obfuscator": "^5.8.0",
     "lucide-react": "1.31.0",
+    "nodemailer": "^10.0.10",
     "react": "19.2.6",
     "react-day-picker": "9.8.1",
     "react-dom": "19.2.6",

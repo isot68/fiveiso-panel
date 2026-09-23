@@ -1,3 +1,4 @@
+import { RegistrationForm } from './registration-form';
 import { BrandLogo } from '@/components/brand-logo';
 import { useEffect, useState } from 'react';
 import { Layers, ArrowLeft, ArrowRight, User, LockKeyhole, Eye, EyeOff } from 'lucide-react';
@@ -12,6 +13,7 @@ function DiscordIcon() {
 
 export function LoginPage({ busy, onLogin }: { busy: boolean; onLogin: (username: string, password: string) => Promise<boolean> }) {
   const [visible, setVisible] = useState(false);
+  const [register, setRegister] = useState(false);
   const [error, setError] = useState('');
   const [discordEnabled, setDiscordEnabled] = useState<boolean | null>(null);
   const invite = typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('invite') || '';
@@ -32,6 +34,7 @@ export function LoginPage({ busy, onLogin }: { busy: boolean; onLogin: (username
     <div className="login-shell">
       <a href="https://fiveiso.com/" className="login-logo"><BrandLogo /></a>
       <section className="login-card">
+        {register ? <RegistrationForm onBack={() => setRegister(false)} /> : <>
         <span className="login-eyebrow">KONTROL MERKEZİ</span>
         <h1>Tekrar hoş geldin.</h1>
         <p>Sunucularını ve ekibini yönetmek için giriş yap.</p>
@@ -47,6 +50,8 @@ export function LoginPage({ busy, onLogin }: { busy: boolean; onLogin: (username
         {discordEnabled ? <a className="login-discord" href={discordUrl}><DiscordIcon />{invite ? 'Discord ile kayıt ol' : 'Discord ile giriş yap'}</a>
           : <button className="login-discord" disabled type="button"><DiscordIcon />Discord ile giriş yap</button>}
         {discordMessages[discordError] && <p className="login-error" role="status">{discordMessages[discordError]}</p>}
+        <p className="registration-link">Hesabın yok mu? <button type="button" onClick={() => setRegister(true)}>Kayıt ol</button></p>
+        </>}
       </section>
       <span className="login-copyright">© {new Date().getFullYear()} FiveISO</span>
     </div>
