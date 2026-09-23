@@ -139,3 +139,9 @@
 .landing-footer nav { color: var(--lp-settings); }
 .landing-copyright { color: var(--lp-settings); }
 .fiveiso-landing a:focus-visible, .fiveiso-landing button:focus-visible, .fiveiso-landing summary:focus-visible { outline-color: var(--lp-overview); }
+
+/* Original framework artwork; ESX has dark lettering that needs a light backing. */
+.framework-logo{display:grid;place-items:center;width:56px;height:56px;flex-shrink:0}
+.framework-logo img{display:block;width:100%;height:100%;object-fit:contain}
+.framework-logo-esx{padding:4px;border-radius:8px;background:#e6ecf8}
+@media(max-width:520px){.framework-logo{width:40px;height:40px}.landing-frameworks>b{gap:8px}}

@@ -88,7 +88,11 @@ export function LandingPage() {
 
       <section id="ozellikler" className="landing-section landing-width">
         <div className="landing-section-head"><span className="landing-eyebrow">TEMEL ÖZELLİKLER</span><h2>Sunucu yönetiminin<br /><span>her parçası, bir arada.</span></h2><p>Canlı veriler, moderasyon araçları ve framework adaptörleriyle ekibinin ihtiyaç duyduğu kontrol.</p></div>
-        <div className="landing-frameworks"><span>FRAMEWORK ADAPTÖRLERİ</span><b><span className="framework-mark">E</span>ESX</b><b><span className="framework-mark">QB</span>QBCore</b><b><span className="framework-mark">Q</span>Qbox</b></div>
+        <div className="landing-frameworks"><span>FRAMEWORK ADAPTÖRLERİ</span>{[
+          { name: 'ESX', asset: 'esx' },
+          { name: 'QBCore', asset: 'qbcore' },
+          { name: 'Qbox', asset: 'qbox' },
+        ].map(({ name, asset }) => <b key={asset}><span className={`framework-logo framework-logo-${asset}`}><img src={`/assets/frameworks/${asset}.webp`} alt="" width={56} height={56} loading="lazy" decoding="async" /></span>{name}</b>)}</div>
         <div className="landing-feature-grid">{features.map(({ tone, icon: Icon, title, text }) => <article key={title} data-tone={tone}><div className="landing-feature-icon"><Icon size={24} /></div><h3>{title}</h3><p>{text}</p></article>)}</div>
       </section>
 
