@@ -44,7 +44,7 @@ export function LandingPage() {
       <section className="landing-hero landing-width">
         <div className="landing-hero-copy">
           <span className="landing-eyebrow"><span className="landing-status-dot" /> FIVEM SUNUCULARI İÇİN TASARLANDI</span>
-          <h1>Modern sunucular için <span>FiveM kontrol merkezi.</span></h1>
+          <h1>Modern sunucular<br />için <span>FiveM<br />kontrol merkezi.</span></h1>
           <p>Oyuncularını takip et, ekibini yönet, sunucunun kontrolünü elinde tut. Canlı veriler ve tarayıcı tabanlı yönetim araçları tek bir çalışma alanında.</p>
           <a href="#fiyatlar" className="landing-button">Paketleri incele <ArrowUpRight size={19} /></a>
           <div className="landing-hero-note"><ShieldCheck size={19} /><span>Sunucun, ekibin ve tüm işlemlerin.<br /><strong>Tek bir merkezden yönet.</strong></span></div>
@@ -52,7 +52,7 @@ export function LandingPage() {
         <figure className="landing-hero-preview">
           <div className="landing-preview-glow" />
           <button className="landing-screen-button" onClick={() => lightbox.current?.showModal()} aria-label="FiveISO kontrol merkezi ekran görüntüsünü büyüt">
-            <img src={preview} width="1920" height="1374" alt="FiveISO kontrol merkezi: oyuncu kapasitesi, sunucu durumu, kaynaklar ve oyuncu trafiği" fetchPriority="high" />
+            <img src="/assets/panel-overview-hero.webp" width="1920" height="1080" alt="FiveISO kontrol merkezi: oyuncu kapasitesi, sunucu durumu, kaynaklar ve oyuncu trafiği" fetchPriority="high" />
             <span className="landing-image-zoom"><Maximize2 size={15} /> Tam ekran</span>
           </button>
           <figcaption><span className="landing-status-dot" /> FiveISO kontrol merkezi <span>Gerçek arayüz · Örnek veriler</span></figcaption>
