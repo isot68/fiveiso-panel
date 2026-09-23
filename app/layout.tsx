@@ -3,6 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'FiveISO | FiveM Kontrol Merkezi',
+  icons: { icon: { url: '/assets/logomain.webp', type: 'image/webp' } },
 };
 
 export default function RootLayout({
