@@ -88,7 +88,7 @@ export function LandingPage() {
 
       <section id="ozellikler" className="landing-section landing-width">
         <div className="landing-section-head"><span className="landing-eyebrow">TEMEL ÖZELLİKLER</span><h2>Sunucu yönetiminin<br /><span>her parçası, bir arada.</span></h2><p>Canlı veriler, moderasyon araçları ve framework adaptörleriyle ekibinin ihtiyaç duyduğu kontrol.</p></div>
-        <div className="landing-frameworks"><span>FRAMEWORK ADAPTÖRLERİ</span>{[
+        <div className="landing-frameworks">{[
           { name: 'ESX', asset: 'esx' },
           { name: 'QBCore', asset: 'qbcore' },
           { name: 'Qbox', asset: 'qbox' },
