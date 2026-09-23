@@ -1,3 +1,4 @@
+import { BrandLogo } from '@/components/brand-logo';
 import { useEffect, useState } from 'react';
 import { Layers, ArrowLeft, ArrowRight, User, LockKeyhole, Eye, EyeOff } from 'lucide-react';
 import './login-page.css';
@@ -29,7 +30,7 @@ export function LoginPage({ busy, onLogin }: { busy: boolean; onLogin: (username
   return <main className="fiveiso-login">
     <a href="https://fiveiso.com/" className="login-home"><ArrowLeft size={16} /> Ana sayfa</a>
     <div className="login-shell">
-      <a href="https://fiveiso.com/" className="login-logo"><Layers size={32} /> FiveISO</a>
+      <a href="https://fiveiso.com/" className="login-logo"><BrandLogo /></a>
       <section className="login-card">
         <span className="login-eyebrow">KONTROL MERKEZİ</span>
         <h1>Tekrar hoş geldin.</h1>

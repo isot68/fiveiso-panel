@@ -1,4 +1,5 @@
 'use client';
+import { BrandLogo } from '@/components/brand-logo';
 import { SectionTheme } from '@/components/ui/section-theme';
 import { ResourceWorkspace } from './resource-workspace';
 import { PlayerWorkspace } from './player-workspace';
@@ -233,12 +234,7 @@ export function ControlPanel() {
       <Sidebar>
         <SidebarHeader className="px-6 py-7">
           <div className="brand">
-            <div className="brand-icon fiveiso-mark">
-              <Network size={25} strokeWidth={1.8} />
-            </div>
-            <span>
-              FiveISO<span className="brand-dot">.</span>
-            </span>
+            <BrandLogo />
           </div>
           <p className="text-xs tracking-[.18em] text-muted-foreground mt-1">
             SERVER OPERATIONS

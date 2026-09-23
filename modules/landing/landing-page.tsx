@@ -1,10 +1,11 @@
+import { BrandLogo } from '@/components/brand-logo';
 import { ArrowUpRight, ArrowRight, Activity, BookOpen, Check, ChevronDown, Code2, Crown, Layers, MapPin, Maximize2, MessageCircle, Server, ShieldCheck, Terminal, Users, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useScrollMemory } from '../panel/use-scroll-memory';
 import './landing.css';
 
 const panelUrl = 'https://panel.fiveiso.com/';
-const preview = '/assets/panel-overview.webp';
+const preview = '/assets/panel-overview.webp?v=brand';
 const features = [
   { icon: Layers, title: 'Gelişmiş web yönetim paneli', text: 'Sunucularını, oyuncularını, kaynaklarını ve ekip işlemlerini tek bir tarayıcı ekranından yönet.' },
   { icon: MapPin, title: 'Canlı oyuncu haritası', text: 'Oyuncu konumlarını takip et. Harita işaretleri ve yetkili konum işlemleriyle sahadaki ekibine destek ol.' },
@@ -61,7 +62,7 @@ export function LandingPage() {
   }, []);
   return <div className="fiveiso-landing" ref={root}>
     <header className="landing-nav landing-width">
-      <a href="/" className="landing-brand" aria-label="FiveISO ana sayfa"><Layers size={27} />FiveISO<span>.</span></a>
+      <a href="/" className="landing-brand" aria-label="FiveISO ana sayfa"><BrandLogo /></a>
       <nav aria-label="Ana menü"><a href="#ozellikler">Özellikler</a><a href="#fiyatlar">Paketler</a><a href="#sorular">SSS</a><a href="#destek">İletişim</a></nav>
       <div className="landing-nav-actions"><a className="landing-login-link" href={panelUrl}>Giriş yap <ArrowUpRight size={15} /></a><a className="landing-button landing-button-small" href="#fiyatlar">FiveISO’yu keşfet <ArrowRight size={15} /></a></div>
     </header>
@@ -78,7 +79,7 @@ export function LandingPage() {
         <figure className="landing-hero-preview">
           <div className="landing-preview-glow" />
           <button className="landing-screen-button" onClick={() => lightbox.current?.showModal()} aria-label="FiveISO kontrol merkezi ekran görüntüsünü büyüt">
-            <img src="/assets/panel-overview-hero.webp" width="1920" height="1080" alt="FiveISO kontrol merkezi: oyuncu kapasitesi, sunucu durumu, kaynaklar ve oyuncu trafiği" fetchPriority="high" />
+            <img src="/assets/panel-overview-hero.webp?v=brand" width="1920" height="1080" alt="FiveISO kontrol merkezi: oyuncu kapasitesi, sunucu durumu, kaynaklar ve oyuncu trafiği" fetchPriority="high" />
             <span className="landing-image-zoom"><Maximize2 size={15} /> Tam ekran</span>
           </button>
           <figcaption><span className="landing-status-dot" /> FiveISO kontrol merkezi <span>Gerçek arayüz · Örnek veriler</span></figcaption>
@@ -117,7 +118,7 @@ export function LandingPage() {
       <section id="destek" className="landing-width landing-support"><div className="landing-support-icon"><MessageCircle size={32} /></div><h2>Kurulum için <span>yardım mı gerekiyor?</span></h2><p>Kaynağı sunucuna eklemek, bağlantıyı yapılandırmak ve ilk kontrolleri yapmak için kurulum rehberine göz at.</p><a className="landing-button" href="/kurulum.html"><BookOpen size={18} /> Kurulum rehberini aç <ArrowUpRight size={17} /></a><span className="landing-support-note">Hesabın hazır mı? <a href={panelUrl}>Kontrol merkezine giriş yap <ArrowRight size={14} /></a></span></section>
     </main>
 
-    <footer className="landing-footer landing-width"><div><a href="/" className="landing-brand"><Layers size={25} />FiveISO<span>.</span></a><p>FiveM sunucuların için merkezi yönetim<br />ve ekip araçları.</p></div><nav aria-label="Alt menü"><a href="/kurulum.html">Dokümantasyon</a><a href="#fiyatlar">Paketler</a><a href={panelUrl}>Panele giriş <ArrowUpRight size={14} /></a></nav><span className="landing-copyright">© {new Date().getFullYear()} FiveISO. Tüm hakları saklıdır.</span></footer>
+    <footer className="landing-footer landing-width"><div><a href="/" className="landing-brand"><BrandLogo /></a><p>FiveM sunucuların için merkezi yönetim<br />ve ekip araçları.</p></div><nav aria-label="Alt menü"><a href="/kurulum.html">Dokümantasyon</a><a href="#fiyatlar">Paketler</a><a href={panelUrl}>Panele giriş <ArrowUpRight size={14} /></a></nav><span className="landing-copyright">© {new Date().getFullYear()} FiveISO. Tüm hakları saklıdır.</span></footer>
     <dialog ref={lightbox} className="landing-lightbox" onClick={event => { if (event.target === event.currentTarget) lightbox.current?.close(); }}><button className="landing-lightbox-close" onClick={() => lightbox.current?.close()} aria-label="Önizlemeyi kapat"><X size={22} /></button><img src={preview} width="1920" height="1374" alt="FiveISO kontrol merkezinin tam ekran görüntüsü; örnek veriler" /><p>FiveISO kontrol merkezi · Örnek veriler</p></dialog>
   </div>;
 }

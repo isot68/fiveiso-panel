@@ -12,7 +12,7 @@ import './map-blip-picker.css';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { Action, Server } from '@/lib/panel-types';
 // Draw one stitched image to avoid SVG subpixel seams between map tiles.
-const mapImage = new URL('../../map/minimap-stitched.png', import.meta.url).href;
+const mapImage = new URL('../../map/minimap-stitched.webp', import.meta.url).href;
 const mapBounds = { left: -4140, top: 8400, tileSize: 4500 };
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 32;

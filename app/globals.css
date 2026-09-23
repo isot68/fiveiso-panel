@@ -119,3 +119,10 @@ button,input,select,textarea{font:inherit}
     @apply font-sans;
   }
 }
+
+/* Shared original FiveISO wordmark. */
+.fiveiso-brand-logo{display:block;width:210px;max-width:100%;height:auto;object-fit:contain;flex-shrink:0}
+.landing-brand .fiveiso-brand-logo{width:210px}
+.login-logo .fiveiso-brand-logo{width:300px}
+.fiveiso-workspace .brand .fiveiso-brand-logo,.owner-sidebar .brand .fiveiso-brand-logo{width:180px}
+@media(max-width:520px){.landing-brand .fiveiso-brand-logo{width:165px}.login-logo .fiveiso-brand-logo{width:255px}}

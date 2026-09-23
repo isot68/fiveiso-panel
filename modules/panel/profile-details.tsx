@@ -312,7 +312,7 @@ export function ProfileDetails({
         <article className="profile-card identity-card">
           <img
             className="profile-decoration identity-decoration"
-            src="/assets/profile/identity.png"
+            src="/assets/profile/identity.webp"
             alt=""
           />
           <h3>Kimlik ve lisans</h3>
@@ -341,7 +341,7 @@ export function ProfileDetails({
         <article className="profile-card character-info-card">
           <img
             className="profile-decoration character-decoration"
-            src="/assets/profile/character.png"
+            src="/assets/profile/character.webp"
             alt=""
           />
           <header>
@@ -371,7 +371,7 @@ export function ProfileDetails({
         <article className="profile-card career-card">
           <img
             className="profile-decoration career-decoration"
-            src="/assets/profile/career.png"
+            src="/assets/profile/career.webp"
             alt=""
           />
           <h3>Meslek ve grup</h3>

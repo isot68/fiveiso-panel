@@ -1,4 +1,5 @@
 'use client';
+import { BrandLogo } from '@/components/brand-logo';
 import { useEffect, useState } from 'react';
 import { useScrollMemory } from '../panel/use-scroll-memory';
 import {
@@ -103,7 +104,7 @@ export function OwnerPanel() {
   return (
     <main className="owner-shell">
       <aside className="owner-sidebar">
-        <a href="/owner" className="brand"><span className="owner-brand-icon"><Crown size={24} /></span>FiveISO<span className="brand-dot">.</span></a>
+        <a href="/owner" className="brand"><BrandLogo /></a>
         <p className="owner-sidebar-caption">SERVER OPERATIONS</p>
         <nav className="owner-nav" aria-label="Sahip paneli">
           <span>YÖNETİM</span>

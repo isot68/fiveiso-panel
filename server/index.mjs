@@ -156,6 +156,7 @@ export function createPanel({
             '.svg': 'image/svg+xml',
             '.woff2': 'font/woff2',
             '.png': 'image/png',
+            '.webp': 'image/webp',
             '.gif': 'image/gif',
             '.ico': 'image/x-icon',
           };

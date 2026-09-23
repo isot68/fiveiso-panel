@@ -9,13 +9,13 @@
   color: #aeb6c4 !important;
 }
 .fiveiso-login {
-  background-image: linear-gradient(#10131cf0, #10131cf0), url('/assets/panel-background.png') !important;
+  background-image: linear-gradient(#10131cf0, #10131cf0), url('/assets/panel-background.webp') !important;
   background-size: cover !important;
   background-position: center !important;
   background-attachment: fixed !important;
 }
 .owner-shell {
-  background-image: linear-gradient(#10131cf3, #10131cf3), url('/assets/panel-background.png') !important;
+  background-image: linear-gradient(#10131cf3, #10131cf3), url('/assets/panel-background.webp') !important;
   background-size: cover !important;
   background-position: center !important;
   background-attachment: fixed !important;
@@ -27,7 +27,7 @@
   --sidebar-primary: var(--section-color);
   --sidebar-accent-foreground: var(--section-color);
   isolation: isolate;
-  background-image: linear-gradient(#10131cf0, #10131cf0), url('/assets/panel-background.png');
+  background-image: linear-gradient(#10131cf0, #10131cf0), url('/assets/panel-background.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -39,7 +39,7 @@
   background: transparent !important;
 }
 .fiveiso-workspace [data-slot='sidebar-inner'] {
-  background-image: linear-gradient(#10131cf3, #10131cf3), url('/assets/panel-background.png') !important;
+  background-image: linear-gradient(#10131cf3, #10131cf3), url('/assets/panel-background.webp') !important;
   background-size: cover !important;
   background-position: center !important;
   background-attachment: fixed !important;

@@ -43,7 +43,7 @@
     radial-gradient(ellipse at 82% 22%, #a273f325, transparent 46%),
     radial-gradient(ellipse at 55% 100%, #ebaa7311, transparent 45%),
     linear-gradient(#0a101bed, #0c101aef),
-    url('/assets/panel-background.png') !important;
+    url('/assets/panel-background.webp') !important;
   background-size: cover !important;
   background-attachment: fixed !important;
 }

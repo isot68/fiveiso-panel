@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import sharp from 'sharp';
 
 const source = 'https://docs.fivem.net/docs/game-references/blips/';
 const root = resolve('public/assets/blips');
@@ -9,7 +10,7 @@ const html = await fetch(source).then((response) => {
 });
 const page = html.replace(/<!--[\s\S]*?-->/g, '');
 const sprites = [...page.matchAll(/<div class="blip"><div><div><img src="(https:\/\/docs-backend\.fivem\.net\/blips\/([a-z0-9_]+)\.(gif|png))" alt="([^"]+)"><\/div><\/div><span><strong>(\d+)<\/strong><br>([^<]+)<\/span><\/div>/g)].map((match) => ({
-  id: Number(match[5]), name: match[6], asset: `/assets/blips/${match[2]}.${match[3]}`, url: match[1],
+  id: Number(match[5]), name: match[6], asset: `/assets/blips/${match[2]}.${match[3] === 'png' ? 'webp' : match[3]}`, url: match[1],
 }));
 const colors = [...page.matchAll(/<div class="blip bcolor"><div class="blip_color" style="background-color: (#[0-9a-fA-F]{6})"><\/div><span><strong>([^<]+)<\/strong><br>([^<]+)<\/span><\/div>/g)].map((match) => ({
   code: match[2], id: Number.parseInt(match[2], 10), name: match[3], hex: match[1].toLowerCase(),
@@ -30,7 +31,11 @@ async function worker() {
         const response = await fetch(sprite.url);
         if (!response.ok || !response.headers.get('content-type')?.startsWith('image/'))
           throw Error(`HTTP ${response.status}: ${sprite.url}`);
-        await writeFile(path, Buffer.from(await response.arrayBuffer()));
+        const downloadedImage = Buffer.from(await response.arrayBuffer());
+        const image = sprite.asset.endsWith('.webp')
+          ? await sharp(downloadedImage).webp({ lossless: true }).toBuffer()
+          : downloadedImage;
+        await writeFile(path, image);
         downloaded++;
         lastError = null;
         break;
