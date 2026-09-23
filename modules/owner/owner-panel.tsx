@@ -349,7 +349,7 @@ export function OwnerPanel() {
                             ?.name || 'Müşteri seç'}
                         </SelectValue>
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="owner-select-menu">
                         {data.tenants.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name}
@@ -365,7 +365,7 @@ export function OwnerPanel() {
       </div>
       </div>
       <Dialog open={!!modal} onOpenChange={(o) => !o && setModal('')}>
-        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="owner-dialog sm:max-w-xl max-h-[85vh] overflow-y-auto">
           <DialogTitle>
             {modal === 'tenant'
               ? 'Müşteri paketi ve erişimi'
@@ -397,8 +397,6 @@ export function OwnerPanel() {
                 } else if (modal === 'server') {
                   const s = await panel.addServer(
                     String(f.get('name')),
-                    String(f.get('region')),
-                    String(f.get('framework')),
                   );
                   await panel.request('/owner/assign-server', { serverId: s.id, tenantId: String(f.get('serverTenantId')) });
                   setSecret('');
@@ -472,18 +470,7 @@ export function OwnerPanel() {
                   placeholder="Sunucu adı"
                   required
                 />
-                <Input
-                  name="region"
-                  aria-label="Konum"
-                  placeholder="İstanbul, TR"
-                  required
-                />
-                <Input
-                  name="framework"
-                  aria-label="Framework"
-                  placeholder="qbx_core / qb-core / esx"
-                  required
-                />
+                <p className="text-sm text-muted-foreground">FiveISO sunucuda başladığında kayıt adı, sunucunun gerçek adıyla otomatik güncellenir.</p>
                 {secret && (
                   <pre className="text-xs whitespace-pre-wrap break-all bg-background p-3">
                     {secret}
@@ -526,7 +513,7 @@ export function OwnerPanel() {
                           'Müşteri seç'}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="owner-select-menu">
                       {data.tenants.map((t) => (
                         <SelectItem key={t.id} value={t.id}>
                           {t.name}
@@ -551,7 +538,7 @@ export function OwnerPanel() {
         </DialogContent>
       </Dialog>
       <Dialog open={!!licenseUser} onOpenChange={open=>!open&&setLicenseUser('')}>
-        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto"><DialogTitle>Kullanıcıya lisans ver</DialogTitle><DialogDescription>{licenseUser} hesabının kendi paneline modül erişimi ve lisans süresi tanımla. Bu panelin mevcut ekip üyeleri de paket kapsamından yararlanır.</DialogDescription>
+        <DialogContent className="owner-dialog sm:max-w-xl max-h-[85vh] overflow-y-auto"><DialogTitle>Kullanıcıya lisans ver</DialogTitle><DialogDescription>{licenseUser} hesabının kendi paneline modül erişimi ve lisans süresi tanımla. Bu panelin mevcut ekip üyeleri de paket kapsamından yararlanır.</DialogDescription>
           <form className="grid gap-4" onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void run(async()=>{await panel.request('/owner/licenses',{username:licenseUser,features:licenseFeatures,expires:f.get('expires')||null});setLicenseUser('');await refresh();});}}>
             <label className="grid gap-2">Bitiş tarihi (boş bırakırsan süresiz)<Input type="date" name="expires" defaultValue={data.tenants.find(t=>t.id===data.users.find(u=>u.username===licenseUser)?.tenantId)?.expires?.slice(0,10)||''}/></label>
             <div className="feature-grid">{Object.entries(data.features).map(([key,label])=><label key={key} className="flex items-center gap-2"><Checkbox checked={licenseFeatures.includes(key)} onCheckedChange={checked=>setLicenseFeatures(prev=>checked?[...prev,key]:prev.filter(k=>k!==key))}/>{label}</label>)}</div>
@@ -560,18 +547,16 @@ export function OwnerPanel() {
         </DialogContent>
       </Dialog>
       <Dialog open={!!licenseServer} onOpenChange={open => !open && setLicenseServer('')}>
-        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="owner-dialog sm:max-w-xl max-h-[85vh] overflow-y-auto">
           <DialogTitle>FiveISO kurulumu ve lisansı</DialogTitle>
           <DialogDescription>Sunucuya özel paketi oluştur, indir veya taşımak için lisansı sil.</DialogDescription>
           {licenseServer && <ResourceInstallation key={licenseServer} serverId={licenseServer} />}
         </DialogContent>
       </Dialog>
       <Dialog open={!!serverEdit} onOpenChange={open => !open && setServerEdit(null)}>
-        <DialogContent><DialogTitle>Sunucuyu düzenle</DialogTitle><DialogDescription>Sunucu adı, konumu ve framework bilgisini güncelle.</DialogDescription>
-          {serverEdit && <form className="grid gap-4" onSubmit={e => {e.preventDefault();const f=new FormData(e.currentTarget);void run(async()=>{await panel.request('/owner/servers',{id:serverEdit.id,name:f.get('name'),region:f.get('region'),framework:f.get('framework')});setServerEdit(null);await refresh();});}}>
+        <DialogContent className="owner-dialog"><DialogTitle>Sunucuyu düzenle</DialogTitle><DialogDescription>Görünen sunucu adını güncelle. FiveISO bağlandığında sunucunun gerçek adı kullanılır.</DialogDescription>
+          {serverEdit && <form className="grid gap-4" onSubmit={e => {e.preventDefault();const f=new FormData(e.currentTarget);void run(async()=>{await panel.request('/owner/servers',{id:serverEdit.id,name:f.get('name')});setServerEdit(null);await refresh();});}}>
             <label>Sunucu adı<Input name="name" defaultValue={serverEdit.name} required maxLength={80}/></label>
-            <label>Konum<Input name="region" defaultValue={serverEdit.region} required maxLength={80}/></label>
-            <label>Framework<Input name="framework" defaultValue={serverEdit.framework} required maxLength={80}/></label>
             <Button type="submit" disabled={busy}>Kaydet</Button>
           </form>}
         </DialogContent>

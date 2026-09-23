@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react';
+import { Download, ShieldCheck, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { notify } from '@/components/ui/toast-center';
 type License = { state: 'unconfigured' | 'pending' | 'bound' | 'revoked'; ip: string | null };
@@ -36,15 +36,31 @@ export function ResourceInstallation({ serverId }: { serverId: string }) {
     } catch (e) { setError((e as Error).message); }
     finally { setBusy(false); }
   }
+  async function download() {
+    if (!license) return;
+    setBusy(true); setError('');
+    try {
+      const action = ['unconfigured','revoked'].includes(license.state) ? 'create' : 'update';
+      const response = await fetch(base + '/license', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})});
+      const result = await response.json() as License & {error?:string};
+      if (!response.ok) throw Error(result.error || 'Paket hazırlanamadı.');
+      setLicense(result);
+      const link = document.createElement('a');
+      link.href = base + '/package'; link.download = 'fiveiso-install.zip';
+      document.body.appendChild(link); link.click(); link.remove();
+      notify('Güncel FiveISO paketinin indirilmesi başlatıldı.', 'success');
+    } catch(e) {setError((e as Error).message);}
+    finally {setBusy(false);}
+  }
   return <div className="grid gap-4">
     <div className="flex items-center gap-3"><ShieldCheck className="text-primary" size={23} /><strong>Sunucuya özel FiveISO kurulumu</strong></div>
     <p className="text-sm text-muted-foreground">{license ? labels[license.state] : 'Lisans bilgileri alınıyor…'}{license?.ip && <> · Bağlı IP: <b>{license.ip}</b></>}</p>
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
     {license && <div className="flex flex-wrap gap-3">
-      {license.state === 'unconfigured' || license.state === 'revoked'
-        ? <Button type="button" disabled={busy} onClick={() => void change('create')}><RefreshCw size={16} />{busy ? 'Paket hazırlanıyor…' : 'Lisans ve kurulum paketi oluştur'}</Button>
-        : <><a className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground" href={base + '/package'} download="fiveiso-install.zip"><Download size={16} /> Kurulum paketini indir</a><Button type="button" variant="outline" disabled={busy} onClick={() => void change('revoke')}><Trash2 size={16} /> Lisansı sil</Button></>}
+      <Button type="button" disabled={busy} onClick={()=>void download()}><Download size={16}/>{busy ? 'Paket hazırlanıyor…' : 'FiveISO indir'}</Button>
+      {['pending','bound'].includes(license.state) && <Button type="button" variant="outline" disabled={busy} onClick={()=>void change('revoke')}><Trash2 size={16}/>Lisansı sil</Button>}
     </div>}
+    <p className="text-sm text-muted-foreground">İndir düğmesi güncel sürümü sunucuna özel hazırlar. Güncelleme mevcut lisansını ve sunucu bağlantısını korur. Yapılandırma dosyalarını düzenleyebilirsin.</p>
     <ol className="setup-list text-sm">
       <li>Paketi indir ve sunucunda resources klasörü dışında aç.</li>
       <li>İşletim sistemine uygun kurulum betiğini server.cfg ve resources yollarıyla çalıştır. Komutlar paketteki KURULUM.txt dosyasında.</li>

@@ -5,6 +5,8 @@ import { resolve, join } from 'node:path';
 const root = resolve(process.env.FIVEISO_SOURCE || '../fiveiso');
 const output = resolve('dist/resource-template.json');
 const read = name => readFile(join(root, name), 'utf8');
+const packagingRoot = resolve('resource-packaging');
+const packaging = name => readFile(join(packagingRoot, name), 'utf8');
 const lua = code => `assert(load("${Array.from(Buffer.from(code)).map(b => '\\' + String(b).padStart(3, '0')).join('')}",nil,"t",_ENV))()`;
 const serverLua = ['database.lua', 'groups.lua', 'bridge.lua', 'server.lua', 'screen-server.lua'];
 const clientLua = ['client.lua', 'screen-client.lua'];
@@ -26,15 +28,15 @@ const payload = {
   nui: obfuscate(chunks[0].code, 'browser'),
 };
 const files = {
-  'fiveiso/bootstrap.js': obfuscate(await read('protection/server.js')),
-  'fiveiso/bootstrap.lua': lua(await read('protection/server.lua')),
-  'fiveiso/client-bootstrap.lua': lua(await read('protection/client.lua')),
+  'fiveiso/bootstrap.js': obfuscate(await packaging('server.js')),
+  'fiveiso/bootstrap.lua': lua(await packaging('server.lua')),
+  'fiveiso/client-bootstrap.lua': lua(await packaging('client.lua')),
   'fiveiso/database-config.lua': await read('database-config.lua'),
-  'fiveiso/ui/screen.js': obfuscate(await read('protection/ui.js'), 'browser'),
+  'fiveiso/ui/screen.js': obfuscate(await packaging('ui.js'), 'browser'),
   'fiveiso/ui/index.html': await read('ui/index.html'),
-  'install.sh': await read('protection/install.sh'),
-  'install.ps1': await read('protection/install.ps1'),
-  'KURULUM.txt': await read('protection/README.txt'),
+  'install.sh': await packaging('install.sh'),
+  'install.ps1': await packaging('install.ps1'),
+  'KURULUM.txt': await packaging('README.txt'),
   'fiveiso/fxmanifest.lua': `fx_version 'cerulean'\ngame 'gta5'\nauthor 'FiveISO'\nversion '2.0.0'\nnode_version '22'\ndependency 'oxmysql'\nserver_scripts {'@oxmysql/lib/MySQL.lua', 'database-config.lua', 'bootstrap.lua', 'bootstrap.js'}\nclient_script 'client-bootstrap.lua'\nui_page 'ui/index.html'\nfiles {'ui/index.html', 'ui/screen.js'}\nescrow_ignore 'database-config.lua'\n`,
 };
 await mkdir(resolve('dist'), { recursive: true });

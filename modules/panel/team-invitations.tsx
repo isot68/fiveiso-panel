@@ -45,9 +45,9 @@ export function TeamInvitations({
   return (
     <section className="space-y-4">
       <div>
-        <h3 className="font-semibold">E-posta ile panel daveti</h3>
+        <h3 className="font-semibold">Panel daveti</h3>
         <p className="text-sm text-muted-foreground">
-          Davet 7 gün geçerlidir. Kabul eden üye sıfır yetkiyle katılır;
+          E-posta yalnızca hesabı bulmak için kullanılır; e-posta gönderilmez. Davet, alıcının Davetler bölümünde 7 gün görünür. Kabul eden üye sıfır yetkiyle katılır;
           yetkilerini aşağıdan belirleyebilirsin.
         </p>
       </div>
@@ -60,7 +60,7 @@ export function TeamInvitations({
             await request('/team/invitations', { email });
             setEmail('');
             await load();
-            notify('Davet e-postası gönderildi.', 'success');
+            notify('Davet kullanıcının paneline eklendi.', 'success');
           } catch (e) {
             notify((e as Error).message, 'error');
           } finally {

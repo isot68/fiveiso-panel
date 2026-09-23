@@ -40,6 +40,8 @@ export function deleteOwnerRecord(db,kind,id) {
  return {users,servers};
 }
 export function updateOwnerServer(db,b) {
+ const existing=typeof b.id==='string'?db.prepare('SELECT region,framework FROM servers WHERE id=?').get(b.id):null;
+ b.region ??= existing?.region; b.framework ??= existing?.framework;
  for(const key of ['name','region','framework'])if(typeof b[key]!=='string'||!b[key].trim()||b[key].length>80)throw fail('Sunucu bilgilerini kontrol et.');
  if(typeof b.id!=='string'||!db.prepare('SELECT id FROM servers WHERE id=?').get(b.id))throw fail('Sunucu bulunamadı.',404);
  db.prepare('UPDATE servers SET name=?,region=?,framework=? WHERE id=?').run(b.name.trim(),b.region.trim(),b.framework.trim(),b.id);

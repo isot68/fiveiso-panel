@@ -2,7 +2,7 @@ import { createPanelInvitations, teamMembers } from './panel-invitations.mjs';
 import { accountSummary } from './account-summary.mjs';
 import { createRegistration } from './registration.mjs';
 import { deleteOwnerRecord, updateOwnerServer, grantUserLicense } from './owner-management.mjs';
-import { migrateLicenses, authorizeAgent, activateLicense, licenseManager, licenseStatus, revokeLicense, createResourcePackage, downloadResourcePackage } from './licensing.mjs';
+import { migrateLicenses, authorizeAgent, activateLicense, licenseManager, licenseStatus, revokeLicense, createResourcePackage, updateResourcePackage, downloadResourcePackage } from './licensing.mjs';
 import { DB_ACTIONS } from './database-actions.mjs';
 import { createScreenStreams } from './screen-streams.mjs';
 import { createAgentStream } from './agent-stream.mjs';
@@ -57,7 +57,7 @@ export function createPanel({
   migrateTenancy(db);
   migrateLicenses(db);
   const registrations = createRegistration(db, registration);
-  const invitations = createPanelInvitations(db, {sendMail: registrations.sendInvitation, origin, audit});
+  const invitations = createPanelInvitations(db, {audit});
   const discordClientId = discord.clientId ?? process.env.DISCORD_CLIENT_ID;
   const discordClientSecret = discord.clientSecret ?? process.env.DISCORD_CLIENT_SECRET;
   const discordRedirectUri = discord.redirectUri ?? process.env.DISCORD_REDIRECT_URI ?? `${origin}/api/auth/discord/callback`;
@@ -537,6 +537,11 @@ export function createPanel({
           joinLocked: b.joinLocked === true,
         };
         currentItemCatalog = snapshot.itemCatalog;
+        const reportedName = typeof b.serverName === 'string'
+          ? b.serverName.replace(/\^[0-9]/g, '').replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0,80) : '';
+        const runningResources = new Set(resources.filter(r => r.state === 'started').map(r => r.name));
+        const detectedFramework = runningResources.has('qbx_core') ? 'Qbox' : runningResources.has('qb-core') ? 'QBCore' : runningResources.has('es_extended') ? 'ESX' : srv.framework;
+        db.prepare('UPDATE servers SET name=?,framework=? WHERE id=?').run(reportedName || srv.name,detectedFramework,id);
         db.prepare('UPDATE servers SET snapshot=?,last_seen=? WHERE id=?').run(
           JSON.stringify(snapshot),
           now,
@@ -739,9 +744,10 @@ export function createPanel({
         if (licenseMatch[2] === 'license' && req.method === 'POST') {
           const b = await body(req);
           if (b.action === 'create') await createResourcePackage(db, id, new URL(resourceOrigin).origin, resourceTemplate);
+          else if (b.action === 'update') await updateResourcePackage(db,id,resourceTemplate);
           else if (b.action === 'revoke') revokeLicense(db, id);
           else throw fail('Lisans işlemi geçersiz.');
-          audit(user.username, id, b.action === 'create' ? 'Korumalı kurulum paketi oluşturuldu' : 'Lisans silindi; eski paket geçersiz');
+          audit(user.username, id, b.action === 'create' ? 'Korumalı kurulum paketi oluşturuldu' : b.action === 'update' ? 'Kurulum paketi güncellendi' : 'Lisans silindi; eski paket geçersiz');
           send(res, 200, licenseStatus(db, id));
           return;
         }
@@ -1120,6 +1126,8 @@ export function createPanel({
         if (user.role !== 'owner')
           throw fail('Sunucu eklemek için ana panel sahibi gerekli.', 403);
         const b = await body(req);
+        b.region ??= 'Otomatik';
+        b.framework ??= 'Otomatik';
         for (const field of ['name', 'region', 'framework'])
           if (
             typeof b[field] !== 'string' ||

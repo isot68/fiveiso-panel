@@ -111,6 +111,7 @@ export function ControlPanel() {
   const [selected, setSelected] = useState(() => sessionStorage.getItem('fiveiso:selected-server') || '');
   const [query, setQuery] = useState('');
   const [modal, setModal] = useState('');
+  const [downloadOpen,setDownloadOpen] = useState(false);
   const [, setFeedback] = useState('');
   const [busy, setBusy] = useState(false);
   const [credentials, setCredentials] = useState<{
@@ -317,6 +318,7 @@ export function ControlPanel() {
             <span>{title}</span>
           </div>
           <div className="flex items-center gap-4">
+            {data.manager && <Button variant="outline" disabled={!server} title={server ? server.name+' için kurulum paketini indir' : 'Önce hesabına bir sunucu atanmalı'} onClick={()=>setDownloadOpen(true)}><ArrowDownToLine size={16}/>FiveISO indir</Button>}
             <button
               aria-label="Kurulum yardımı"
               onClick={() => setPage('settings')}
@@ -716,7 +718,7 @@ export function ControlPanel() {
                   </Button>}
                 </div>
                 {!server?.capabilities?.includes('setJoinLock') && (
-                  <p className="text-sm text-amber-200 mt-4">Bu ayar için güncel fiveiso sürümünü sunucuya kurun.</p>
+                  <p className="text-sm text-amber-200 mt-4">Bu ayar için FiveISO’yu güncelle.{data.manager && server && <button className="ml-2 underline" onClick={()=>setDownloadOpen(true)}>Güncel paketi indir</button>}</p>
                 )}
               </section>
               <section className="surface p-6">
@@ -964,6 +966,9 @@ export function ControlPanel() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Dialog open={downloadOpen} onOpenChange={setDownloadOpen}>
+        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto"><DialogTitle>FiveISO indir</DialogTitle><DialogDescription>{server?.name} için güncel kurulum paketi.</DialogDescription>{server&&<ResourceInstallation key={server.id} serverId={server.id}/>}</DialogContent>
+      </Dialog>
     </SidebarProvider></SectionTheme.Provider>
   );
 }

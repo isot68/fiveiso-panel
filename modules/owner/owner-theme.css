@@ -1,0 +1,186 @@
+/* Owner dialogs render through a portal; keep their theme independent of ancestry. */
+.owner-shell.owner-shell,
+.owner-auth-shell {
+  --section-color: #b889f5;
+  --primary: var(--section-color);
+  --ring: var(--section-color);
+  background-image:
+    radial-gradient(ellipse at 24% 0%, #22d3ee24, transparent 43%),
+    radial-gradient(ellipse at 82% 22%, #a273f325, transparent 46%),
+    radial-gradient(ellipse at 55% 100%, #ebaa7311, transparent 45%),
+    linear-gradient(#0a101bd9, #0c101ade), url('/assets/panel-background.webp') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+}
+.owner-shell .owner-sidebar {
+  background: #101722a8;
+  backdrop-filter: blur(18px);
+}
+.owner-shell .owner-main {
+  background: transparent;
+}
+.owner-shell .owner-header {
+  background: #101a278c !important;
+  backdrop-filter: blur(16px);
+}
+.owner-shell .owner-content .glass-panel,
+.owner-auth-shell .owner-login {
+  border: 1px solid #b9dbef22 !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #29334299, #131923b8) !important;
+  box-shadow:
+    inset 0 1px 0 #e4f7ff0b,
+    0 12px 32px #03060c28;
+  backdrop-filter: blur(12px);
+}
+.owner-dialog[data-slot='dialog-content'] {
+  --section-color: #b889f5;
+  --primary: #b889f5;
+  --ring: #b889f5;
+  --primary-foreground: #17131e;
+  padding: 28px;
+  gap: 20px;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at top left, #b889f51c, transparent 70%),
+    linear-gradient(#141d2ae8, #141d2aee),
+    url('/assets/panel-background.webp') center/cover;
+  border: 1px solid #b9dbef30;
+  box-shadow:
+    inset 0 1px #ffffff14,
+    0 30px 100px #02050ccc;
+  font-family: 'FiveISO Poppins', Arial, sans-serif;
+  color: #e7effc;
+}
+:is(.owner-shell, .owner-auth-shell, .owner-dialog)
+  :is([data-slot='input'], [data-slot='select-trigger'], select) {
+  height: 42px;
+  min-height: 42px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #bbd7ec25;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #283442db, #1b2431ed);
+  box-shadow: inset 0 1px #ffffff06;
+  color: #e7effc;
+  font-size: 13px;
+  line-height: 22px;
+  outline: none;
+}
+:is(.owner-shell, .owner-auth-shell, .owner-dialog)
+  :is([data-slot='input'], [data-slot='select-trigger'], select):focus-visible {
+  border-color: #b889f599;
+  box-shadow: 0 0 0 3px #b889f517;
+}
+:is(.owner-shell, .owner-auth-shell, .owner-dialog) [data-slot='button'] {
+  height: 42px;
+  min-height: 42px;
+  padding: 0 15px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  gap: 8px;
+}
+:is(.owner-shell, .owner-auth-shell, .owner-dialog)
+  [data-slot='button'][data-variant='default'] {
+  background: linear-gradient(135deg, #72508bad, #43394fd6);
+  color: #f1eaff;
+  border: 1px solid #b889f57a;
+  box-shadow:
+    inset 0 1px #ffffff20,
+    0 0 14px #b889f515;
+}
+:is(.owner-shell, .owner-auth-shell, .owner-dialog)
+  [data-slot='button']:is(
+    [data-variant='outline'],
+    [data-variant='secondary']
+  ) {
+  background: linear-gradient(145deg, #34415180, #1e2735b0);
+  border: 1px solid #c1d9f22b;
+  color: #d8e7f3;
+  box-shadow: inset 0 1px #ffffff09;
+}
+:is(.owner-shell, .owner-auth-shell, .owner-dialog)
+  [data-slot='button'][data-variant='ghost'] {
+  background: #b9dbef08;
+  border: 1px solid #b9dbef18;
+  color: #b8c8db;
+}
+:is(.owner-shell, .owner-auth-shell, .owner-dialog)
+  [data-slot='button'][data-variant='destructive'] {
+  background: #ef718b12;
+  border: 1px solid #ef718b30;
+  color: #f398aa;
+}
+.owner-dialog [data-slot='button'][data-slot='dialog-close'],
+.owner-dialog [data-slot='dialog-close'] {
+  height: 30px;
+  min-height: 30px;
+  width: 30px;
+  padding: 0;
+  right: 12px;
+  top: 12px;
+  background: #ffffff06;
+}
+.owner-dialog form > label,
+.owner-auth-shell form > label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  color: #aebed1;
+}
+.owner-dialog form > label.flex {
+  display: flex;
+}
+.owner-dialog .feature-grid label {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.owner-dialog [data-slot='dialog-title'] {
+  font-size: 20px;
+  line-height: 1.5;
+  letter-spacing: -0.4px;
+  padding-right: 24px;
+}
+.owner-dialog [data-slot='dialog-description'] {
+  color: #97a9bd;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.owner-select-menu {
+  background: #172332ed !important;
+  border: 1px solid #b9dbef30 !important;
+  backdrop-filter: blur(24px);
+  color: #e7effc !important;
+}
+.owner-shell .activity-row > div.flex-1 {
+  min-width: 150px;
+  overflow-wrap: anywhere;
+}
+.owner-shell .owner-stats > div:nth-child(1) {
+  color: #61dce6;
+}
+.owner-shell .owner-stats > div:nth-child(2) {
+  color: #b889f5;
+}
+.owner-shell .owner-stats > div:nth-child(3) {
+  color: #65d8aa;
+}
+@media (max-width: 600px) {
+  .owner-dialog[data-slot='dialog-content'] {
+    padding: 24px 19px;
+    gap: 17px;
+    max-width: calc(100% - 24px);
+  }
+  .owner-shell .owner-header {
+    padding: 12px 16px !important;
+  }
+  .owner-shell .owner-content {
+    padding: 20px 16px;
+  }
+  .owner-auth-shell .owner-login {
+    padding: 26px;
+  }
+}

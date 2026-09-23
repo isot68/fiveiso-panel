@@ -27,7 +27,7 @@ async function fixture(t) {
  const login = async role => (await request('/login',{username:role,password:'test-password-123'})).headers.get('set-cookie').split(';')[0];
  const owner=await login('owner'), manager=await login('admin'), viewer=await login('viewer');
  const server=await (await request('/servers',{name:'Licensed',region:'TR',framework:'QBCore'},owner)).json();
- return {db,request,owner,manager,viewer,server,base};
+ return {db,request,owner,manager,viewer,server,base,resourceTemplate};
 }
 async function install(f) {
  const path=`/servers/${f.server.id}`;
@@ -109,4 +109,26 @@ test('client IP trusts only an explicitly configured local reverse proxy',()=>{
  assert.equal(clientAddress(req('127.0.0.1','203.0.113.2'),true),'203.0.113.2');
  assert.equal(clientAddress(req('::ffff:192.0.2.2')), '192.0.2.2');
  assert.throws(()=>clientAddress(req('127.0.0.1','not-an-ip'),true));
+});
+
+test('package updates deliver new encrypted runtime while preserving license, token, key and machine binding',async t=>{
+ const f=await fixture(t),installed=await install(f),{path,headers,config}=installed;
+ const initial=await (await f.request('/license/activate',{packageId:config.packageId},'',headers)).json();
+ const before=f.db.prepare('SELECT * FROM resource_licenses WHERE server_id=?').get(f.server.id);
+ await writeFile(f.resourceTemplate,JSON.stringify({files:{'fiveiso/fxmanifest.lua':"game 'gta5'",'fiveiso/database-config.lua':'ReadableConfig = {}'},payload:{version:2,serverName:'new runtime'}}));
+ assert.equal((await f.request(path+'/license',{action:'update'},f.viewer)).status,403);
+ assert.equal((await f.request(path+'/license',{action:'update'},f.manager)).status,200);
+ const updated=unzipSync(new Uint8Array(await (await f.request(path+'/package',undefined,f.manager)).arrayBuffer()));
+ assert.deepEqual(JSON.parse(strFromU8(updated['fiveiso/license.json'])),config);
+ assert.equal(strFromU8(updated['fiveiso/database-config.lua']),'ReadableConfig = {}');
+ assert(!Object.keys(updated).some(name=>name.includes('protection/')||name.includes('resource-packaging/')||name.endsWith('.map')));
+ const after=f.db.prepare('SELECT * FROM resource_licenses WHERE server_id=?').get(f.server.id);
+ for(const key of ['package_id','encryption_key','bound_ip','fingerprint','lease_until','created'])assert.equal(after[key],before[key]);
+ const data=Buffer.from(strFromU8(updated['fiveiso/runtime.fiso']),'base64');
+ const decipher=createDecipheriv('aes-256-gcm',Buffer.from(initial.key,'base64'),data.subarray(5,17));decipher.setAAD(Buffer.from(config.packageId));decipher.setAuthTag(data.subarray(17,33));
+ assert.deepEqual(JSON.parse(Buffer.concat([decipher.update(data.subarray(33)),decipher.final()]).toString()),{version:2,serverName:'new runtime'});
+ assert.equal((await f.request('/agent/heartbeat',{pollOnly:true},'',headers)).status,200);
+ assert.equal((await f.request('/license/activate',{packageId:config.packageId},'',{...headers,'X-FiveISO-Instance':'b'.repeat(64)})).status,409);
+ await f.request(path+'/license',{action:'revoke'},f.manager);
+ assert.equal((await f.request(path+'/license',{action:'update'},f.manager)).status,404);
 });

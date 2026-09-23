@@ -43,7 +43,7 @@ export function teamMembers(db, user) {
       ...permissionRecord(db, { ...u, workspaceId: tenant.id }),
     }));
 }
-export function createPanelInvitations(db, { sendMail, origin, audit }) {
+export function createPanelInvitations(db, { audit }) {
   function manager(user) {
     const tenant = tenantFor(db, user);
     if (
@@ -71,7 +71,7 @@ export function createPanelInvitations(db, { sendMail, origin, audit }) {
               : i.status,
         }));
     },
-    async send(user, b) {
+    send(user, b) {
       const tenant = manager(user);
       const email =
         typeof b.email === 'string' ? b.email.trim().toLowerCase() : '';
@@ -121,38 +121,14 @@ export function createPanelInvitations(db, { sendMail, origin, audit }) {
         tenant.id,
         email,
         user.username,
-        'sending',
+        'pending',
         Date.now(),
         Date.now() + 7 * DAY,
       );
-      try {
-        await sendMail({
-          to: email,
-          subject: 'FiveISO panel daveti',
-          text: `${user.username}, seni ${tenant.name} paneline davet etti.\n\nDavetini onaylamak veya reddetmek için ${origin}/panel adresinde bu e-posta ile doğrulanmış hesabına giriş yap. Hesabın yoksa önce kayıt ol.\n\nKabul ettiğinde hiçbir yetkin olmayacak. Panel sahibi daha sonra yetkilerini belirleyebilir. Davet 7 gün geçerlidir.`,
-        });
-      } catch (error) {
-        db.prepare(
-          "UPDATE panel_invitations SET status='failed' WHERE id=?",
-        ).run(id);
-        throw error;
-      }
-      // The manager may have revoked it or lost access while SMTP was in flight.
-      try {
-        manager(user);
-      } catch (error) {
-        db.prepare(
-          "UPDATE panel_invitations SET status='revoked' WHERE id=?",
-        ).run(id);
-        throw error;
-      }
-      db.prepare(
-        "UPDATE panel_invitations SET status='pending' WHERE id=? AND status='sending'",
-      ).run(id);
       audit(
         user.username,
         'tenant:' + tenant.id,
-        'E-posta daveti gönderildi: ' + email,
+        'Panel daveti oluşturuldu: ' + email,
       );
       return { id };
     },

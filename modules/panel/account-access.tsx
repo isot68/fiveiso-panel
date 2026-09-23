@@ -1,3 +1,9 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { useState } from 'react';
 import { Check, Mail, X, Layers } from 'lucide-react';
 import type { CustomerAccount } from '@/lib/panel-types';
@@ -10,11 +16,13 @@ type Props = {
 };
 export function AccountAccess({ account, request, onSaved }: Props) {
   const [busy, setBusy] = useState(false);
+  const [invitationsOpen, setInvitationsOpen] = useState(false);
   async function run(path: string, body: unknown) {
     setBusy(true);
     try {
       await request(path, body);
       await onSaved();
+      if (path === '/account/invitations/respond') setInvitationsOpen(false);
       notify('İşlem tamamlandı.', 'success');
     } catch (e) {
       notify((e as Error).message, 'error');
@@ -43,55 +51,70 @@ export function AccountAccess({ account, request, onSaved }: Props) {
             </option>
           ))}
         </select>
+        <button
+          type="button"
+          className="account-invitations-trigger"
+          onClick={() => setInvitationsOpen(true)}
+        >
+          <Mail size={17} /> Davetler <span>{account.invitations.length}</span>
+        </button>
       </div>
-      {account.invitations.length > 0 && (
-        <div className="account-invitations">
-          <h2>
-            <Mail size={18} /> Bekleyen davetler{' '}
-            <span>{account.invitations.length}</span>
-          </h2>
-          {account.invitations.map((invite) => (
-            <article key={invite.id}>
-              <div>
-                <strong>{invite.workspaceName}</strong>
-                <p>
-                  {invite.invitedBy} seni paneline davet etti. Kabul ettiğinde
-                  yetkisiz üye olarak katılacaksın.
-                </p>
-                <small>
-                  Son tarih:{' '}
-                  {new Date(invite.expires).toLocaleDateString('tr-TR')}
-                </small>
-              </div>
-              <div className="account-invite-actions">
-                <button
-                  disabled={busy}
-                  className="accept"
-                  onClick={() =>
-                    void run('/account/invitations/respond', {
-                      id: invite.id,
-                      action: 'accept',
-                    })
-                  }
-                >
-                  <Check size={15} /> Onayla
-                </button>
-                <button
-                  disabled={busy}
-                  onClick={() =>
-                    void run('/account/invitations/respond', {
-                      id: invite.id,
-                      action: 'reject',
-                    })
-                  }
-                >
-                  <X size={15} /> Reddet
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      <Dialog open={invitationsOpen} onOpenChange={setInvitationsOpen}>
+        <DialogContent className="account-invitation-dialog sm:max-w-xl max-h-[85vh] overflow-y-auto">
+          <DialogTitle>Davetler</DialogTitle>
+          <DialogDescription>
+            Panellere katılma isteklerini buradan onaylayabilir veya
+            reddedebilirsin. Davetler yalnızca panelde gösterilir.
+          </DialogDescription>
+          <div className="account-invitations">
+            {account.invitations.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Bekleyen davetin yok.
+              </p>
+            )}
+            {account.invitations.map((invite) => (
+              <article key={invite.id}>
+                <div>
+                  <strong>{invite.workspaceName}</strong>
+                  <p>
+                    {invite.invitedBy} seni paneline davet etti. Kabul ettiğinde
+                    yetkisiz üye olarak katılacaksın.
+                  </p>
+                  <small>
+                    Son tarih:{' '}
+                    {new Date(invite.expires).toLocaleDateString('tr-TR')}
+                  </small>
+                </div>
+                <div className="account-invite-actions">
+                  <button
+                    disabled={busy}
+                    className="accept"
+                    onClick={() =>
+                      void run('/account/invitations/respond', {
+                        id: invite.id,
+                        action: 'accept',
+                      })
+                    }
+                  >
+                    <Check size={15} /> Onayla
+                  </button>
+                  <button
+                    disabled={busy}
+                    onClick={() =>
+                      void run('/account/invitations/respond', {
+                        id: invite.id,
+                        action: 'reject',
+                      })
+                    }
+                  >
+                    <X size={15} /> Reddet
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

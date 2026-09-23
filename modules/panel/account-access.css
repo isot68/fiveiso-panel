@@ -119,3 +119,4 @@
     justify-content: center;
   }
 }
+.account-invitations-trigger{display:flex;align-items:center;justify-content:center;gap:9px;flex-shrink:0;min-height:38px;border:1px solid #b889f53a;border-radius:7px;background:linear-gradient(135deg,#b889f51c,#61dce60b);color:#cab2e9;padding:8px 13px;font-size:12px;cursor:pointer}.account-invitations-trigger span{display:grid;place-items:center;min-width:21px;height:21px;border-radius:5px;background:#b889f522;font-size:11px}.account-invitation-dialog .account-invitations{padding:0;border-top:0}.account-invitation-dialog .account-invitations article:first-child{border-top:0;padding-top:0}

@@ -105,7 +105,7 @@ export function usePanel() {
     }
     throw new Error('İşlem yapmak için giriş yapın.');
   }
-  async function addServer(name: string, region: string, framework: string) {
+  async function addServer(name: string, region?: string, framework?: string) {
     if (live) {
       const result = await request<{ id: string; token: string }>('/servers', {
         name,

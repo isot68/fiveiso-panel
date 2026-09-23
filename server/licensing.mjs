@@ -2,7 +2,7 @@ import { randomBytes, randomUUID, createCipheriv } from 'node:crypto';
 import { isIP } from 'node:net';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { zipSync, strToU8 } from 'fflate';
+import { zipSync, strToU8, unzipSync, strFromU8 } from 'fflate';
 import { sameToken, hashToken, token } from './security.mjs';
 import { activeTenant, permissionRecord, tenantFor } from './tenancy.mjs';
 const fail = (message, status = 403) => Object.assign(Error(message), { status });
@@ -79,6 +79,28 @@ export function revokeLicense(db, id) {
     db.exec('COMMIT');
   } catch (e) { db.exec('ROLLBACK'); throw e; }
 }
+function encodeArchive(template, config, key, iv = randomBytes(12)) {
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  cipher.setAAD(Buffer.from(config.packageId));
+  const encrypted = Buffer.concat([cipher.update(JSON.stringify(template.payload)), cipher.final()]);
+  const payload = Buffer.concat([Buffer.from('FISO1'), iv, cipher.getAuthTag(), encrypted]).toString('base64');
+  const files = Object.fromEntries(Object.entries(template.files).map(([name, content]) => [name, strToU8(content)]));
+  files['fiveiso/license.json'] = strToU8(JSON.stringify(config));
+  files['fiveiso/runtime.fiso'] = strToU8(payload);
+  return Buffer.from(zipSync(files));
+}
+export async function updateResourcePackage(db,id,templatePath=resolve('dist/resource-template.json')) {
+  const template=JSON.parse(await readFile(templatePath,'utf8').catch(()=>{throw fail('Kurulum paketi henüz derlenmedi.',503);}));
+  const archive=downloadResourcePackage(db,id);
+  const license=db.prepare('SELECT package_id,encryption_key FROM resource_licenses WHERE server_id=?').get(id);
+  const files=unzipSync(new Uint8Array(archive));
+  const config=JSON.parse(strFromU8(files['fiveiso/license.json']));
+  const server=db.prepare('SELECT token_hash FROM servers WHERE id=?').get(id);
+  if(!license.encryption_key||config.packageId!==license.package_id||config.serverId!==id||!sameToken(config.token,server.token_hash))throw fail('Kurulum kimliği doğrulanamadı.',409);
+  const updated=encodeArchive(template,config,Buffer.from(license.encryption_key,'base64'));
+  db.prepare('UPDATE resource_licenses SET archive=? WHERE server_id=? AND package_id=?').run(updated,id,license.package_id);
+  return {ok:true};
+}
 export async function createResourcePackage(db, id, origin, templatePath = resolve('dist/resource-template.json')) {
   if (new URL(origin).protocol !== 'https:') throw fail('Kurulum paketleri HTTPS panel adresi gerektiriyor.', 409);
   const template = JSON.parse(await readFile(templatePath, 'utf8').catch(() => { throw fail('Kurulum paketi henüz derlenmedi.', 503); }));
@@ -87,14 +109,7 @@ export async function createResourcePackage(db, id, origin, templatePath = resol
   const old = db.prepare('SELECT revoked FROM resource_licenses WHERE server_id=?').get(id);
   if (old && !old.revoked) throw fail('Lisans zaten var. Mevcut paketi indirin veya önce lisansı silin.', 409);
   const packageId = randomUUID(), secret = token(), key = randomBytes(32), iv = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', key, iv);
-  cipher.setAAD(Buffer.from(packageId));
-  const encrypted = Buffer.concat([cipher.update(JSON.stringify(template.payload)), cipher.final()]);
-  const payload = Buffer.concat([Buffer.from('FISO1'), iv, cipher.getAuthTag(), encrypted]).toString('base64');
-  const files = Object.fromEntries(Object.entries(template.files).map(([name, content]) => [name, strToU8(content)]));
-  files['fiveiso/license.json'] = strToU8(JSON.stringify({ origin, serverId: id, packageId, token: secret }));
-  files['fiveiso/runtime.fiso'] = strToU8(payload);
-  const archive = Buffer.from(zipSync(files));
+  const archive = encodeArchive(template,{origin,serverId:id,packageId,token:secret},key,iv);
   db.exec('BEGIN IMMEDIATE');
   try {
     db.prepare(`INSERT INTO resource_licenses(server_id,tenant_id,package_id,encryption_key,archive,created)

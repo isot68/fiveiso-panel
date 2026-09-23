@@ -5,6 +5,7 @@
 @import '../modules/panel/workspace.css';
 @import '../modules/owner/owner-workspace.css';
 @import '../modules/panel/glass-theme.css';
+@import '../modules/owner/owner-theme.css';
 
 @font-face{font-family:'FiveISO Poppins';src:url('/assets/fonts/Poppins-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
 @font-face{font-family:'FiveISO Poppins';src:url('/assets/fonts/Poppins-Medium.ttf') format('truetype');font-style:normal;font-weight:500;font-display:swap}

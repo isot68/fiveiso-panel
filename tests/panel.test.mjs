@@ -1171,7 +1171,7 @@ test('verified email invitations require recipient consent, start with zero acce
  const sent=[];const {db,request,admin,viewer,other,owner}=await invitationFixture(t,m=>sent.push(m));
  const server=(await request('/servers',{name:'Private server',region:'TR',framework:'QBCore'},owner)).data;
  const invite=await request('/team/invitations',{email:'  VIEWER@example.test '},admin);
- assert.equal(invite.status,200);assert.equal(sent[0].to,'viewer@example.test');
+ assert.equal(invite.status,200);assert.equal(sent.length,0);
  assert.equal((await request('/team/invitations',{email:'viewer@example.test'},admin)).status,409);
  assert.equal((await request('/account',undefined,other)).data.invitations.length,0);
  assert.equal((await request('/account/invitations/respond',{id:invite.data.id,action:'accept'},other)).status,404);
@@ -1201,7 +1201,7 @@ test('verified email invitations require recipient consent, start with zero acce
  assert.equal((await request('/team/members/remove',{username:'viewer'},admin)).status,200);
  assert.equal(db.prepare('SELECT username FROM users WHERE username=?').get('viewer').username,'viewer');
 });
-test('invitations handle rejection, expiry, cancellation, unverified email and email delivery failure',async t=>{
+test('invitations handle rejection, expiry, cancellation, unverified email and never depend on SMTP',async t=>{
  const {db,request,admin,viewer}=await invitationFixture(t);
  let invite=(await request('/team/invitations',{email:'viewer@example.test'},admin)).data;
  db.prepare('UPDATE user_emails SET verified=0 WHERE username=?').run('viewer');
@@ -1217,8 +1217,8 @@ test('invitations handle rejection, expiry, cancellation, unverified email and e
  await request('/team/invitations/revoke',{id:invite.id},admin);
  assert.equal((await request('/account/invitations/respond',{id:invite.id,action:'accept'},viewer)).status,404);
  const failed=await invitationFixture(t,async()=>{throw Error('SMTP down');});
- assert.equal((await failed.request('/team/invitations',{email:'viewer@example.test'},failed.admin)).status,503);
- assert.equal((await failed.request('/account',undefined,failed.viewer)).data.invitations.length,0);
+ assert.equal((await failed.request('/team/invitations',{email:'viewer@example.test'},failed.admin)).status,200);
+ assert.equal((await failed.request('/account',undefined,failed.viewer)).data.invitations.length,1);
 });
 test('owner grants user package modules and duration without granting invited workspace management',async t=>{
  const {db,request,admin,viewer,owner}=await invitationFixture(t);
@@ -1251,4 +1251,26 @@ test('owner licensing an existing staff member preserves their old membership wi
  const member=(await request('/state',undefined,viewer)).data;
  assert.equal(member.manager,false);assert.deepEqual(member.permissions,['overview']);
  assert.equal((await request('/account/workspace',{id:'local'},owner)).status,403);
+});
+
+test('owner adds a server with only a name; authenticated full heartbeats update name and framework',async t=>{
+ const {db,request,login}=await fixture(t),owner=await login('owner');
+ const created=await request('/servers',{name:'Kurulum bekleniyor'},owner);
+ assert.equal(created.status,201);
+ const row=()=>db.prepare('SELECT name,region,framework FROM servers WHERE id=?').get(created.data.id);
+ assert.equal(row().region,'Otomatik');assert.equal(row().framework,'Otomatik');
+ const headers={'X-FiveISO-Server':created.data.id,Authorization:'Bearer '+created.data.token};
+ const data={...snapshot,serverName:'^2Gerçek sunucu\n',resources:[{name:'qbx_core',state:'started'}]};
+ assert.equal((await request('/agent/heartbeat',data,'',{...headers,Authorization:'Bearer wrong-token'})).status,401);
+ assert.equal(row().name,'Kurulum bekleniyor');
+ assert.equal((await request('/agent/heartbeat',data,'',headers)).status,200);
+ assert.equal(row().name,'Gerçek sunucu');assert.equal(row().framework,'Qbox');
+ await request('/agent/heartbeat',{pollOnly:true,serverName:'Poll should not rename'},'',headers);
+ assert.equal(row().name,'Gerçek sunucu');
+ await request('/agent/heartbeat',{...snapshot,serverName:'   '},'',headers);
+ assert.equal(row().name,'Gerçek sunucu');
+ assert.equal((await request('/owner/servers',{id:created.data.id,name:'Geçici ad'},owner)).status,200);
+ assert.equal(row().name,'Geçici ad');
+ await request('/agent/heartbeat',{...snapshot,serverName:'Yeni gerçek ad'},'',headers);
+ assert.equal(row().name,'Yeni gerçek ad');
 });
