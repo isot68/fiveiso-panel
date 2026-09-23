@@ -41,11 +41,9 @@ export function LandingPage() {
     ) || []);
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        entry.target.classList.add('landing-revealed');
-        observer.unobserve(entry.target);
+        entry.target.classList.toggle('landing-revealed', entry.isIntersecting);
       }
-    }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+    }, { threshold: 0.08, rootMargin: '-24px 0px -24px 0px' });
     for (const element of elements) {
       const siblings = Array.from(element.parentElement?.children || []);
       const stagger = element.matches('article') ? siblings.indexOf(element) % 3 * 90 : 0;
