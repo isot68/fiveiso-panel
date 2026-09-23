@@ -7,18 +7,18 @@ import './landing.css';
 const panelUrl = 'https://panel.fiveiso.com/';
 const preview = '/assets/panel-overview.webp?v=brand';
 const features = [
-  { icon: Layers, title: 'Gelişmiş web yönetim paneli', text: 'Sunucularını, oyuncularını, kaynaklarını ve ekip işlemlerini tek bir tarayıcı ekranından yönet.' },
-  { icon: MapPin, title: 'Canlı oyuncu haritası', text: 'Oyuncu konumlarını takip et. Harita işaretleri ve yetkili konum işlemleriyle sahadaki ekibine destek ol.' },
-  { icon: Users, title: 'Oyuncu ve karakter bilgileri', text: 'Karakter hesapları, araçlar, meslekler ve envanter bilgilerini sunucu adaptörünün sunduğu kapsamda incele.' },
-  { icon: Terminal, title: 'Kaynaklar ve konsol', text: 'Kaynak durumlarını izle, yetkin dahilinde yeniden başlat ve FiveM konsol komutlarının sonuçlarını gör.' },
-  { icon: ShieldCheck, title: 'Ayrıntılı ekip yetkileri', text: 'Her ekip üyesine görevine uygun erişim ver. Görüntüleme ve işlem yetkilerini ayrı ayrı belirle.' },
-  { icon: Activity, title: 'İşlem kayıtları', text: 'Kim, hangi sunucuda, hangi işlemi yaptı? Moderasyon ve sunucu işlemlerinin sonuçlarını takip et.' },
+  { tone: 'overview', icon: Layers, title: 'Gelişmiş web yönetim paneli', text: 'Sunucularını, oyuncularını, kaynaklarını ve ekip işlemlerini tek bir tarayıcı ekranından yönet.' },
+  { tone: 'map', icon: MapPin, title: 'Canlı oyuncu haritası', text: 'Oyuncu konumlarını takip et. Harita işaretleri ve yetkili konum işlemleriyle sahadaki ekibine destek ol.' },
+  { tone: 'players', icon: Users, title: 'Oyuncu ve karakter bilgileri', text: 'Karakter hesapları, araçlar, meslekler ve envanter bilgilerini sunucu adaptörünün sunduğu kapsamda incele.' },
+  { tone: 'console', icon: Terminal, title: 'Kaynaklar ve konsol', text: 'Kaynak durumlarını izle, yetkin dahilinde yeniden başlat ve FiveM konsol komutlarının sonuçlarını gör.' },
+  { tone: 'team', icon: ShieldCheck, title: 'Ayrıntılı ekip yetkileri', text: 'Her ekip üyesine görevine uygun erişim ver. Görüntüleme ve işlem yetkilerini ayrı ayrı belirle.' },
+  { tone: 'audit', icon: Activity, title: 'İşlem kayıtları', text: 'Kim, hangi sunucuda, hangi işlemi yaptı? Moderasyon ve sunucu işlemlerinin sonuçlarını takip et.' },
 ];
 const benefits = [
-  { icon: Server, title: 'Birden fazla sunucu', text: 'Farklı makinelerdeki FiveM sunucularını aynı merkezde topla ve çalışma alanları arasında geçiş yap.' },
-  { icon: ShieldCheck, title: 'Kontrollü erişim', text: 'Sunucu anahtarları, hesap yetkileri ve müşteri bazında erişim kontrolleriyle işlemlerini sınırlandır.' },
-  { icon: Users, title: 'Ekip için tasarlandı', text: 'Oyuncu bilgilerini, yetkileri ve işlem geçmişini ekibinin günlük çalışma düzenine taşı.' },
-  { icon: Code2, title: 'Framework adaptörleri', text: 'QBCore, Qbox ve ESX için sunucu verilerine bağlanan adaptörlerle mevcut kurulumuna uyum sağla.' },
+  { tone: 'resources', icon: Server, title: 'Birden fazla sunucu', text: 'Farklı makinelerdeki FiveM sunucularını aynı merkezde topla ve çalışma alanları arasında geçiş yap.' },
+  { tone: 'team', icon: ShieldCheck, title: 'Kontrollü erişim', text: 'Sunucu anahtarları, hesap yetkileri ve müşteri bazında erişim kontrolleriyle işlemlerini sınırlandır.' },
+  { tone: 'players', icon: Users, title: 'Ekip için tasarlandı', text: 'Oyuncu bilgilerini, yetkileri ve işlem geçmişini ekibinin günlük çalışma düzenine taşı.' },
+  { tone: 'jobs', icon: Code2, title: 'Framework adaptörleri', text: 'QBCore, Qbox ve ESX için sunucu verilerine bağlanan adaptörlerle mevcut kurulumuna uyum sağla.' },
 ];
 const questions = [
   ['FiveISO nasıl çalışır?', 'FiveM sunucuna kurulan fiveiso kaynağı panelin HTTPS API’sine bağlanır. Sunucu verilerini iletir, yetkili işlemleri alır ve sonuçlarını panele bildirir. Komut bildirimleri için WebSocket kanalı kullanılır.'],
@@ -89,7 +89,7 @@ export function LandingPage() {
       <section id="ozellikler" className="landing-section landing-width">
         <div className="landing-section-head"><span className="landing-eyebrow">TEMEL ÖZELLİKLER</span><h2>Sunucu yönetiminin<br /><span>her parçası, bir arada.</span></h2><p>Canlı veriler, moderasyon araçları ve framework adaptörleriyle ekibinin ihtiyaç duyduğu kontrol.</p></div>
         <div className="landing-frameworks"><span>FRAMEWORK ADAPTÖRLERİ</span><b><span className="framework-mark">E</span>ESX</b><b><span className="framework-mark">QB</span>QBCore</b><b><span className="framework-mark">Q</span>Qbox</b></div>
-        <div className="landing-feature-grid">{features.map(({ icon: Icon, title, text }) => <article key={title}><div className="landing-feature-icon"><Icon size={24} /></div><h3>{title}</h3><p>{text}</p></article>)}</div>
+        <div className="landing-feature-grid">{features.map(({ tone, icon: Icon, title, text }) => <article key={title} data-tone={tone}><div className="landing-feature-icon"><Icon size={24} /></div><h3>{title}</h3><p>{text}</p></article>)}</div>
       </section>
 
       <section id="panel" className="landing-section landing-dashboard-section">
@@ -98,10 +98,10 @@ export function LandingPage() {
           <div className="landing-dashboard-layout">
           <button className="landing-screen-button landing-wide-screen" onClick={() => lightbox.current?.showModal()} aria-label="Panel önizlemesini tam ekran aç"><img src={preview} width="1920" height="1374" alt="FiveISO sunucu panelinin tam ekran önizlemesi, örnek verilerle" loading="lazy" /><span className="landing-image-zoom"><Maximize2 size={15} /> Önizlemeyi büyüt</span></button>
           <div className="landing-dashboard-points">{[
-            { icon: Users, title: 'Oyuncu bilgileri', text: 'Oyuncu ve karakter kayıtlarını incele, yetkili moderasyon işlemlerini aynı yerden yürüt.' },
-            { icon: Activity, title: 'Canlı durum', text: 'Oyuncu trafiğini, çalışan kaynakları ve sunucu bağlantılarını tek bakışta takip et.' },
-            { icon: MapPin, title: 'Harita kontrolü', text: 'Oyuncu konumlarını gör, sunucunun harita işaretlerini ve konum işlemlerini yönet.' },
-          ].map(({ icon: Icon, title, text }) => <article key={title}><Icon size={21} /><h3>{title}</h3><p>{text}</p></article>)}</div>
+            { tone: 'players', icon: Users, title: 'Oyuncu bilgileri', text: 'Oyuncu ve karakter kayıtlarını incele, yetkili moderasyon işlemlerini aynı yerden yürüt.' },
+            { tone: 'overview', icon: Activity, title: 'Canlı durum', text: 'Oyuncu trafiğini, çalışan kaynakları ve sunucu bağlantılarını tek bakışta takip et.' },
+            { tone: 'map', icon: MapPin, title: 'Harita kontrolü', text: 'Oyuncu konumlarını gör, sunucunun harita işaretlerini ve konum işlemlerini yönet.' },
+          ].map(({ tone, icon: Icon, title, text }) => <article key={title} data-tone={tone}><Icon size={21} /><h3>{title}</h3><p>{text}</p></article>)}</div>
           </div>
         </div>
       </section>
@@ -111,7 +111,7 @@ export function LandingPage() {
         <div className="landing-pricing">{[{ title: 'Aylık', icon: Server, caption: 'Dönemlik erişim' }, { title: 'Ömür boyu', icon: Crown, caption: 'Uzun vadeli kullanım' }].map(({ title, icon: Icon, caption }) => <article key={title} className="landing-price-card"><div className="landing-package-art"><div className="landing-package-orbit" /><Icon size={58} strokeWidth={1.2} /><span>FIVEISO</span></div><div className="landing-price-body"><span className="landing-eyebrow">{caption}</span><h3>{title}</h3><p className="landing-price-pending">Fiyat bilgisi yakında</p><ul>{['Tarayıcı tabanlı yönetim paneli', 'Oyuncu ve kaynak araçları', 'Ekip yetkileri ve işlem kayıtları', 'FiveM kaynak bağlantısı'].map(item => <li key={item}><Check size={16} />{item}</li>)}</ul><button className="landing-button" disabled>Henüz satışa açık değil</button></div></article>)}</div>
       </section>
 
-      <section className="landing-section landing-why"><div className="landing-width"><div className="landing-section-head"><span className="landing-eyebrow">NEDEN FIVEISO?</span><h2>FiveM sunucularının<br /><span>günlük işleyişine göre tasarlandı.</span></h2></div><div className="landing-benefits">{benefits.map(({ icon: Icon, title, text }) => <article key={title}><Icon size={25} /><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+      <section className="landing-section landing-why"><div className="landing-width"><div className="landing-section-head"><span className="landing-eyebrow">NEDEN FIVEISO?</span><h2>FiveM sunucularının<br /><span>günlük işleyişine göre tasarlandı.</span></h2></div><div className="landing-benefits">{benefits.map(({ tone, icon: Icon, title, text }) => <article key={title} data-tone={tone}><Icon size={25} /><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
 
       <section id="sorular" className="landing-section landing-width landing-faq"><div className="landing-section-head"><span className="landing-eyebrow">SSS</span><h2>Aklındaki <span>sorular.</span></h2></div><div className="landing-faq-list">{questions.map(([question, answer]) => <details key={question}><summary>{question}<ChevronDown size={18} /></summary><p>{answer}</p></details>)}</div></section>
 

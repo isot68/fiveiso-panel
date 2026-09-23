@@ -38,3 +38,104 @@
 @media(max-width:800px){.landing-dashboard-layout{grid-template-columns:1fr}.landing-dashboard-layout .landing-dashboard-points{gap:12px}.landing-pricing{padding:16px}}
 @media(max-width:520px){.fiveiso-landing{--landing-gutter:16px}.landing-dashboard-layout{padding:10px;gap:15px}.landing-dashboard-points article{padding:16px}.landing-pricing{padding:12px;gap:16px}}
 @media(prefers-reduced-motion:reduce){.fiveiso-landing .landing-reveal{opacity:1;filter:none;transform:none;transition:none}}
+
+/* Match the workspace section palette and glass surfaces. */
+.fiveiso-landing {
+  --lp-accent: #61dce6;
+  --lp-text: #e6ecf8;
+  --lp-muted: #a6b5ce;
+  --lp-overview: #61dce6;
+  --lp-players: #b889f5;
+  --lp-accounts: #eea978;
+  --lp-map: #65d8aa;
+  --lp-vehicles: #5dd5c5;
+  --lp-items: #86d99b;
+  --lp-jobs: #a3d574;
+  --lp-factions: #cad775;
+  --lp-audit: #e7cc82;
+  --lp-console: #b7c1d1;
+  --lp-resources: #edabb5;
+  --lp-team: #ea869e;
+  --lp-settings: #a6b5ce;
+  background:
+    radial-gradient(ellipse 85% 650px at 0 0, #61dce61c, transparent 70%),
+    radial-gradient(ellipse 65% 750px at 100% 350px, #b889f522, transparent 70%),
+    radial-gradient(ellipse 80% 750px at 0 1600px, #65d8aa12, transparent 70%),
+    #090e1c;
+}
+.fiveiso-landing [data-tone="overview"] { --lp-tone: var(--lp-overview); }
+.fiveiso-landing [data-tone="players"] { --lp-tone: var(--lp-players); }
+.fiveiso-landing [data-tone="map"] { --lp-tone: var(--lp-map); }
+.fiveiso-landing [data-tone="console"] { --lp-tone: var(--lp-console); }
+.fiveiso-landing [data-tone="team"] { --lp-tone: var(--lp-team); }
+.fiveiso-landing [data-tone="audit"] { --lp-tone: var(--lp-audit); }
+.fiveiso-landing [data-tone="resources"] { --lp-tone: var(--lp-resources); }
+.fiveiso-landing [data-tone="jobs"] { --lp-tone: var(--lp-jobs); }
+.landing-nav { border-bottom-color: #61dce621; }
+.landing-nav nav a:nth-child(1) { color: var(--lp-overview); }
+.landing-nav nav a:nth-child(2) { color: var(--lp-accounts); }
+.landing-nav nav a:nth-child(3) { color: var(--lp-players); }
+.landing-nav nav a:nth-child(4) { color: var(--lp-map); }
+.landing-button {
+  background: linear-gradient(115deg, var(--lp-overview), var(--lp-vehicles));
+  border-color: #8aeef266;
+  color: #08252d;
+  box-shadow: 0 6px 25px #61dce619;
+}
+.landing-button:hover { background: #8aeef2; color: #08252d !important; }
+.landing-hero h1 span {
+  color: var(--lp-overview);
+  background: linear-gradient(110deg, var(--lp-overview) 5%, var(--lp-players) 58%, var(--lp-resources));
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.landing-status-dot { background: var(--lp-map); box-shadow: 0 0 12px #65d8aa70; }
+.landing-hero-note svg { color: var(--lp-items); }
+.landing-hero-note, .landing-frameworks>span, .landing-support-note, .landing-footer p { color: var(--lp-muted); }
+.landing-hero-note strong { color: var(--lp-console); }
+.landing-preview-glow {
+  background: radial-gradient(ellipse at 20% 30%, #61dce626, transparent 60%), radial-gradient(ellipse at 85% 65%, #b889f533, transparent 65%);
+}
+.landing-screen-button { border-color: #61dce638; }
+.landing-frameworks>b:nth-of-type(1) { --lp-tone: var(--lp-accounts); }
+.landing-frameworks>b:nth-of-type(2) { --lp-tone: var(--lp-vehicles); }
+.landing-frameworks>b:nth-of-type(3) { --lp-tone: var(--lp-factions); }
+.framework-mark, .landing-feature-icon, .landing-support-icon {
+  color: var(--lp-tone, var(--lp-overview));
+  border-color: color-mix(in srgb, var(--lp-tone, var(--lp-overview)) 32%, transparent);
+  background: color-mix(in srgb, var(--lp-tone, var(--lp-overview)) 12%, transparent);
+}
+.landing-feature-grid article, .landing-dashboard-points article {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--lp-tone) 12%, #1b2535), #111a2c);
+  border-color: color-mix(in srgb, var(--lp-tone) 25%, transparent);
+  box-shadow: inset 0 1px #e4f7ff0b;
+}
+.landing-feature-grid article:hover { border-color: var(--lp-tone); }
+.landing-dashboard-section { background: linear-gradient(150deg, #61dce609, #b889f50c 65%, #090e1c); }
+.landing-dashboard-layout, .landing-pricing { background: linear-gradient(135deg, #293342a6, #131923e8); border-color: #b9dbef22; }
+.landing-dashboard-points svg, .landing-benefits svg { color: var(--lp-tone); }
+#panel .landing-eyebrow, #panel h2 span { color: var(--lp-players); }
+#fiyatlar .landing-eyebrow, #fiyatlar h2 span { color: var(--lp-accounts); }
+.landing-price-card { --lp-tone: var(--lp-overview); background: #111a2c; border-color: color-mix(in srgb, var(--lp-tone) 30%, transparent); }
+.landing-price-card:nth-child(2) { --lp-tone: var(--lp-accounts); }
+.landing-price-card .landing-package-art {
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--lp-tone) 22%, #111a2c), #111a2c 75%);
+  color: var(--lp-tone);
+}
+.landing-package-orbit { border-color: color-mix(in srgb, var(--lp-tone) 30%, transparent); }
+#fiyatlar .landing-price-body .landing-eyebrow { color: var(--lp-tone); }
+.landing-price-pending, .landing-price-body li { color: var(--lp-muted); }
+.landing-price-body li svg { color: var(--lp-items); }
+.landing-price-body .landing-button { background: var(--lp-tone); border-color: var(--lp-tone); }
+.landing-why { background: linear-gradient(125deg, #65d8aa09, #ea869e0b); }
+.landing-why .landing-eyebrow, .landing-why h2 span { color: var(--lp-items); }
+.landing-benefits article { border-top: 2px solid color-mix(in srgb, var(--lp-tone) 55%, transparent); padding-top: 24px; }
+.landing-faq .landing-eyebrow, .landing-faq h2 span { color: var(--lp-audit); }
+.landing-faq summary { color: var(--lp-text); }
+.landing-faq summary svg { color: var(--lp-audit); }
+.landing-faq details[open] { border-bottom-color: #e7cc8250; }
+.landing-support { --lp-tone: var(--lp-vehicles); border-color: #5dd5c533; background: radial-gradient(ellipse at top left, #5dd5c51a, transparent 65%), radial-gradient(ellipse at bottom right, #b889f518, transparent 65%), #111a2c; }
+.landing-support h2 span, .landing-support-note a { color: var(--lp-vehicles); }
+.landing-footer nav { color: var(--lp-settings); }
+.landing-copyright { color: var(--lp-settings); }
+.fiveiso-landing a:focus-visible, .fiveiso-landing button:focus-visible, .fiveiso-landing summary:focus-visible { outline-color: var(--lp-overview); }
