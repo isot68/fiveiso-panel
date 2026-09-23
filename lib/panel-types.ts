@@ -55,7 +55,15 @@ export type Ban = {
   reason: string;
   created: string;
 };
+export type CustomerAccount = {
+  username: string; role: string; manager: boolean;
+  hasPackage: boolean;
+  status: 'active' | 'unconfigured' | 'expired' | 'suspended';
+  serverCount: number; expires: string | null;
+  emailVerified: boolean; discordLinked: boolean;
+};
 export type PanelState = {
+  account?: CustomerAccount | null;
   features?: string[];
   permissions?: string[];
   manager?: boolean;

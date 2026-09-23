@@ -1,3 +1,4 @@
+import { accountSummary } from './account-summary.mjs';
 import { createRegistration } from './registration.mjs';
 import { deleteOwnerRecord, updateOwnerServer } from './owner-management.mjs';
 import { migrateLicenses, authorizeAgent, activateLicense, licenseManager, licenseStatus, revokeLicense, createResourcePackage, downloadResourcePackage } from './licensing.mjs';
@@ -685,6 +686,19 @@ export function createPanel({
             .get(session.username)
         : null;
       if (!user) throw fail('Giriş yapmalısın.', 401);
+      if (path === '/api/account' && req.method === 'GET') {
+        send(res, 200, accountSummary(db, user));
+        return;
+      }
+      if (path === '/api/logout' && req.method === 'POST') {
+        sessions.delete(hashToken(cookie));
+        res.setHeader(
+          'Set-Cookie',
+          'fiveiso_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0',
+        );
+        send(res, 200, { ok: true });
+        return;
+      }
       if (user.role !== 'owner' && !activeTenant(tenantFor(db, user)))
         throw fail('Panel erişimi durdurulmuş veya süresi dolmuş.', 403);
       if (await screens.viewer(req, res, path, user, cookie)) return;
@@ -736,15 +750,7 @@ export function createPanel({
         });
         return;
       }
-      if (path === '/api/logout' && req.method === 'POST') {
-        sessions.delete(hashToken(cookie));
-        res.setHeader(
-          'Set-Cookie',
-          'fiveiso_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0',
-        );
-        send(res, 200, { ok: true });
-        return;
-      }
+
 
       if (path === '/api/team/roles' && req.method === 'POST') {
         if (!access(db, user, null, 'team') || !permissionRecord(db, user).manager)
@@ -1043,6 +1049,7 @@ export function createPanel({
           }));
         send(res, 200, {
           servers,
+          account: accountSummary(db, user),
           features:
             user.role === 'owner'
               ? []

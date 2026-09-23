@@ -1,3 +1,4 @@
+import { CustomerHome } from './customer-home';
 import { ResourceInstallation } from './resource-installation';
 'use client';
 import { BrandLogo } from '@/components/brand-logo';
@@ -203,6 +204,9 @@ export function ControlPanel() {
   }
   if (!live) {
     return <LoginPage busy={busy} onLogin={(username, password) => run(() => panel.login(username, password), 'Giriş yapıldı.')} />;
+  }
+  if (data.account && data.account.status !== 'active') {
+    return <CustomerHome account={data.account} busy={busy} onLogout={() => run(panel.logout, 'Çıkış yapıldı.')} />;
   }
   return (
     <SectionTheme.Provider value={page}><SidebarProvider

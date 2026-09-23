@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import type { Action, PanelState } from '@/lib/panel-types';
+import type { Action, PanelState, CustomerAccount } from '@/lib/panel-types';
 const emptyState = (): PanelState => ({ servers: [], audit: [], bans: [], users: [] });
 export function usePanel() {
   const [data, setData] = useState<PanelState>(emptyState());
@@ -31,9 +31,17 @@ export function usePanel() {
     }
     return r.json() as Promise<T>;
   }
+  async function readState(): Promise<PanelState> {
+    try { return await request<PanelState>('/state'); }
+    catch (error) {
+      if ((error as { status?: number }).status !== 403) throw error;
+      const account = await request<CustomerAccount>('/account');
+      return { ...emptyState(), account };
+    }
+  }
   async function refresh() {
     try {
-      setData(await request<PanelState>('/state'));
+      setData(await readState());
       setError('');
     } catch (e) {
       if ([401, 403].includes((e as Error & { status: number }).status)) {
@@ -48,10 +56,8 @@ export function usePanel() {
     let cancelled = false;
     async function restoreSession() {
       try {
-        const currentUser = await request<{ username: string; role: string; manager?: boolean; permissions?: string[] }>(
-          '/me',
-        );
-        const state = await request<PanelState>('/state');
+        const state = await readState();
+        const currentUser = state.account || await request<{ username: string; role: string }>('/me');
         if (!cancelled) {
           setUser(currentUser);
           setData(state);
@@ -79,7 +85,7 @@ export function usePanel() {
       password,
     });
     setUser(u);
-    const state = await request<PanelState>('/state');
+    const state = await readState();
     setData(state);
     setLive(true);
     setError('');

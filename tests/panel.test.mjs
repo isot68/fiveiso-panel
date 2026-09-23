@@ -1128,3 +1128,31 @@ test('owner can edit/delete servers and users; deleting a tenant removes its rec
  const {migrateTenancy}=await import('../server/tenancy.mjs');migrateTenancy(db);
  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM tenants').get().n,0);
 });
+
+test('account home distinguishes registration from assigned packages and keeps inactive data private', async (t) => {
+  const { db, request, login } = await fixture(t);
+  assert.equal((await request('/account')).status, 401);
+  const cookie = await login('admin');
+  db.prepare('UPDATE tenants SET features=? WHERE id=?').run(JSON.stringify(['overview', 'settings']), 'local');
+  const fresh = await request('/state', undefined, cookie);
+  assert.equal(fresh.data.account.hasPackage, false);
+  assert.equal(fresh.data.account.status, 'unconfigured');
+  assert.equal(fresh.data.account.serverCount, 0);
+  assert.equal(fresh.data.account.emailVerified, false);
+  db.prepare('UPDATE tenants SET features=? WHERE id=?').run(JSON.stringify(['overview', 'settings', 'players']), 'local');
+  assert.equal((await request('/account', undefined, cookie)).data.status, 'active');
+  db.prepare('UPDATE tenants SET expires=? WHERE id=?').run('2000-01-01', 'local');
+  assert.equal((await request('/state', undefined, cookie)).status, 403);
+  assert.equal((await request('/me', undefined, cookie)).status, 403);
+  const expired = await request('/account', undefined, cookie);
+  assert.equal(expired.status, 200);
+  assert.equal(expired.data.status, 'expired');
+  assert.equal(expired.data.hasPackage, true);
+  assert.equal(expired.data.servers, undefined);
+  assert.equal(expired.data.features, undefined);
+  assert.equal(expired.data.token, undefined);
+  db.prepare('UPDATE tenants SET enabled=0 WHERE id=?').run('local');
+  assert.equal((await request('/account', undefined, cookie)).data.status, 'suspended');
+  assert.equal((await request('/logout', {}, cookie)).status, 200);
+  assert.equal((await request('/account', undefined, cookie)).status, 401);
+});
