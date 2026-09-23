@@ -18,3 +18,23 @@
 @media(max-width:1100px){.fiveiso-landing .landing-hero{gap:28px}.landing-hero h1{font-size:clamp(38px,4.1vw,48px);letter-spacing:-1.5px}.landing-hero .landing-eyebrow{font-size:9px}.landing-hero-copy>p{font-size:14px}}
 @media(max-width:800px){.fiveiso-landing .landing-hero{width:calc(100% - 40px);grid-template-columns:1fr;gap:30px;padding-block:40px 45px}.landing-hero h1{font-size:clamp(40px,6.8vw,58px);max-width:none}.landing-hero-copy{max-width:none}.landing-hero-copy>p{max-width:600px}.landing-hero .landing-eyebrow{font-size:10px}}
 @media(max-width:520px){.fiveiso-landing .landing-hero{width:calc(100% - 32px)}.landing-hero h1{font-size:clamp(34px,8.8vw,44px);letter-spacing:-1.2px}.landing-hero-copy>p{font-size:14px}}
+
+/* Wide introduction, centered content sections. */
+.fiveiso-landing{--landing-gutter:clamp(20px,2.7vw,64px)}
+.fiveiso-landing .landing-width{width:calc(100% - var(--landing-gutter)*2);max-width:1180px}
+.fiveiso-landing .landing-nav,.fiveiso-landing .landing-hero,.fiveiso-landing #ozellikler{max-width:none}
+.landing-feature-grid,.landing-frameworks{max-width:1180px;margin-inline:auto}
+.landing-dashboard-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:center;padding:18px;background:#151520;border:1px solid #ffffff12;border-radius:12px}
+.landing-dashboard-layout .landing-wide-screen{box-shadow:none;min-width:0}
+.landing-dashboard-layout .landing-dashboard-points{display:grid;grid-template-columns:1fr;gap:16px;margin:0;max-width:none}
+.landing-dashboard-points article{display:grid;grid-template-columns:28px 1fr;column-gap:12px;padding:20px;border:1px solid #ffffff10;border-radius:9px;background:#ffffff02}
+.landing-dashboard-points article>svg{grid-column:1;grid-row:1 / span 2;margin:3px 0 0}
+.landing-dashboard-points article>h3,.landing-dashboard-points article>p{grid-column:2}
+.landing-dashboard-points article>h3{margin-bottom:6px}
+.landing-pricing{max-width:800px;padding:22px;background:#151520;border:1px solid #ffffff12;border-radius:12px;gap:20px}
+.fiveiso-landing .landing-faq{max-width:1000px}
+.fiveiso-landing .landing-reveal{opacity:0;filter:blur(10px);transform:translateY(30px) scale(.94);transition:opacity 800ms ease var(--reveal-delay,0ms),filter 1000ms ease var(--reveal-delay,0ms),transform 1000ms cubic-bezier(.2,.7,.2,1) var(--reveal-delay,0ms)}
+.fiveiso-landing .landing-revealed{opacity:1;filter:blur(0);transform:translateY(0) scale(1)}
+@media(max-width:800px){.landing-dashboard-layout{grid-template-columns:1fr}.landing-dashboard-layout .landing-dashboard-points{gap:12px}.landing-pricing{padding:16px}}
+@media(max-width:520px){.fiveiso-landing{--landing-gutter:16px}.landing-dashboard-layout{padding:10px;gap:15px}.landing-dashboard-points article{padding:16px}.landing-pricing{padding:12px;gap:16px}}
+@media(prefers-reduced-motion:reduce){.fiveiso-landing .landing-reveal{opacity:1;filter:none;transform:none;transition:none}}

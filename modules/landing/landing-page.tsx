@@ -1,5 +1,5 @@
 import { ArrowUpRight, ArrowRight, Activity, BookOpen, Check, ChevronDown, Code2, Crown, Layers, MapPin, Maximize2, MessageCircle, Server, ShieldCheck, Terminal, Users, X } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useScrollMemory } from '../panel/use-scroll-memory';
 import './landing.css';
 
@@ -33,7 +33,35 @@ const questions = [
 export function LandingPage() {
   useScrollMemory('fiveiso:scroll:landing', true);
   const lightbox = useRef<HTMLDialogElement>(null);
-  return <div className="fiveiso-landing">
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+    const elements = Array.from(root.current?.querySelectorAll<HTMLElement>(
+      '.landing-hero-copy, .landing-hero-preview, .landing-section-head, .landing-frameworks, .landing-feature-grid article, .landing-dashboard-layout, .landing-price-card, .landing-benefits article, .landing-faq details, .landing-support'
+    ) || []);
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('landing-revealed');
+        observer.unobserve(entry.target);
+      }
+    }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+    for (const element of elements) {
+      const siblings = Array.from(element.parentElement?.children || []);
+      const stagger = element.matches('article') ? siblings.indexOf(element) % 3 * 90 : 0;
+      element.style.setProperty('--reveal-delay', `${stagger}ms`);
+      element.classList.add('landing-reveal');
+      observer.observe(element);
+    }
+    return () => {
+      observer.disconnect();
+      for (const element of elements) {
+        element.classList.remove('landing-reveal', 'landing-revealed');
+        element.style.removeProperty('--reveal-delay');
+      }
+    };
+  }, []);
+  return <div className="fiveiso-landing" ref={root}>
     <header className="landing-nav landing-width">
       <a href="/" className="landing-brand" aria-label="FiveISO ana sayfa"><Layers size={27} />FiveISO<span>.</span></a>
       <nav aria-label="Ana menü"><a href="#ozellikler">Özellikler</a><a href="#fiyatlar">Paketler</a><a href="#sorular">SSS</a><a href="#destek">İletişim</a></nav>
@@ -68,12 +96,14 @@ export function LandingPage() {
       <section id="panel" className="landing-section landing-dashboard-section">
         <div className="landing-width">
           <div className="landing-section-head"><span className="landing-eyebrow">PANEL ÖNİZLEMESİ</span><h2>Ekibinin ihtiyaç duyduğu her şey.<br /><span>Doğrudan tarayıcıda.</span></h2></div>
+          <div className="landing-dashboard-layout">
           <button className="landing-screen-button landing-wide-screen" onClick={() => lightbox.current?.showModal()} aria-label="Panel önizlemesini tam ekran aç"><img src={preview} width="1920" height="1374" alt="FiveISO sunucu panelinin tam ekran önizlemesi, örnek verilerle" loading="lazy" /><span className="landing-image-zoom"><Maximize2 size={15} /> Önizlemeyi büyüt</span></button>
           <div className="landing-dashboard-points">{[
             { icon: Users, title: 'Oyuncu bilgileri', text: 'Oyuncu ve karakter kayıtlarını incele, yetkili moderasyon işlemlerini aynı yerden yürüt.' },
             { icon: Activity, title: 'Canlı durum', text: 'Oyuncu trafiğini, çalışan kaynakları ve sunucu bağlantılarını tek bakışta takip et.' },
             { icon: MapPin, title: 'Harita kontrolü', text: 'Oyuncu konumlarını gör, sunucunun harita işaretlerini ve konum işlemlerini yönet.' },
           ].map(({ icon: Icon, title, text }) => <article key={title}><Icon size={21} /><h3>{title}</h3><p>{text}</p></article>)}</div>
+          </div>
         </div>
       </section>
 
