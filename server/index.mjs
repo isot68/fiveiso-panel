@@ -1122,6 +1122,25 @@ export function createPanel({
         });
         return;
       }
+      if (path === '/api/installation/server' && req.method === 'POST') {
+        if (user.role === 'owner' || !permissionRecord(db,user).manager)
+          throw fail('Kurulum için lisanslı panel sahibi gerekli.',403);
+        const tenant=tenantFor(db,user);
+        if (!JSON.parse(tenant.features).some(key=>!['overview','settings'].includes(key)))
+          throw fail('Önce hesabına bir lisans tanımlanmalı.',403);
+        const existing=db.prepare('SELECT server_id AS id FROM server_tenants WHERE tenant_id=? ORDER BY server_id LIMIT 1').get(tenant.id);
+        if(existing){send(res,200,existing);return;}
+        const id=randomUUID();
+        db.exec('BEGIN IMMEDIATE');
+        try {
+          db.prepare('INSERT INTO servers(id,name,region,framework,token_hash) VALUES(?,?,?,?,?)')
+            .run(id,(tenant.name+' sunucusu').slice(0,80),'Otomatik','Otomatik',hashToken(token()));
+          db.prepare('INSERT INTO server_tenants VALUES(?,?)').run(id,tenant.id);
+          db.exec('COMMIT');
+        }catch(error){db.exec('ROLLBACK');throw error;}
+        audit(user.username,id,'İlk kurulum için sunucu kaydı oluşturuldu');
+        send(res,201,{id});return;
+      }
       if (path === '/api/servers' && req.method === 'POST') {
         if (user.role !== 'owner')
           throw fail('Sunucu eklemek için ana panel sahibi gerekli.', 403);

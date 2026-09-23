@@ -1274,3 +1274,21 @@ test('owner adds a server with only a name; authenticated full heartbeats update
  await request('/agent/heartbeat',{...snapshot,serverName:'Yeni gerçek ad'},'',headers);
  assert.equal(row().name,'Yeni gerçek ad');
 });
+
+test('licensed managers can initialize their first installation without an owner assignment; retries reuse it',async t=>{
+ const {db,request,admin,viewer,owner}=await invitationFixture(t);
+ assert.equal((await request('/installation/server',{})).status,401);
+ assert.equal((await request('/installation/server',{},owner)).status,403);
+ assert.equal((await request('/installation/server',{},viewer)).status,403);
+ const created=await request('/installation/server',{},admin);
+ assert.equal(created.status,201);
+ assert.equal(db.prepare('SELECT tenant_id FROM server_tenants WHERE server_id=?').get(created.data.id).tenant_id,'local');
+ const again=await request('/installation/server',{},admin);assert.equal(again.status,200);assert.equal(again.data.id,created.data.id);
+ assert.equal(db.prepare('SELECT COUNT(*) AS n FROM servers').get().n,1);
+ await request('/owner/licenses',{username:'viewer',features:['overview','players']},owner);
+ const personal=await request('/installation/server',{},viewer);assert.equal(personal.status,201);assert.notEqual(personal.data.id,created.data.id);
+ db.prepare('UPDATE user_permissions SET manager=0,permissions=? WHERE username=?').run('["overview"]','viewer');
+ assert.equal((await request('/installation/server',{},viewer)).status,403);
+ db.prepare('UPDATE tenants SET enabled=0 WHERE id=?').run('local');
+ assert.equal((await request('/installation/server',{},admin)).status,403);
+});

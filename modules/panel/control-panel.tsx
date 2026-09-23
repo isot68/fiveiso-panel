@@ -318,7 +318,10 @@ export function ControlPanel() {
             <span>{title}</span>
           </div>
           <div className="flex items-center gap-4">
-            {data.manager && <Button variant="outline" disabled={!server} title={server ? server.name+' için kurulum paketini indir' : 'Önce hesabına bir sunucu atanmalı'} onClick={()=>setDownloadOpen(true)}><ArrowDownToLine size={16}/>FiveISO indir</Button>}
+            {data.manager && <Button variant="outline" disabled={busy} onClick={()=>void run(async()=>{
+              if(!server){await panel.request('/installation/server',{});await panel.refresh();}
+              setDownloadOpen(true);
+            },'Kurulum hazır.')}><ArrowDownToLine size={16}/>{busy?'Hazırlanıyor…':'FiveISO indir'}</Button>}
             <button
               aria-label="Kurulum yardımı"
               onClick={() => setPage('settings')}
